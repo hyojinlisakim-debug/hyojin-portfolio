@@ -25,19 +25,19 @@ export default function HomePage() {
 
   const skills = [
     {
-      icon: '🐍', color: 'rgba(124,111,255,0.15)', title: 'Development',
+      icon: '🐍', color: 'rgba(124,111,255,0.12)', title: 'Development',
       tags: ['Python', 'SQL', 'JavaScript', 'Java', 'Liquid'],
     },
     {
-      icon: '🛍', color: 'rgba(46,207,168,0.12)', title: 'Web & Commerce',
+      icon: '🛍', color: 'rgba(46,207,168,0.1)', title: 'Web & Commerce',
       tags: ['Shopify', 'HTML/CSS', 'Section Dev', 'UI Design', 'UX Planning'],
     },
     {
-      icon: '⚙️', color: 'rgba(245,166,35,0.12)', title: 'Systems & Infrastructure',
+      icon: '⚙️', color: 'rgba(245,166,35,0.1)', title: 'Systems & Infrastructure',
       tags: ['Linux', 'AWS', 'ERP/EAM', 'Oracle DB', 'Cisco'],
     },
     {
-      icon: '🔗', color: 'rgba(255,107,107,0.1)', title: 'Integration & Ops',
+      icon: '🔗', color: 'rgba(255,107,107,0.08)', title: 'Integration & Ops',
       tags: ['REST API', 'SAP', 'SSO', 'Firewall/ACL', 'Network Monitoring'],
     },
   ]
@@ -53,8 +53,8 @@ export default function HomePage() {
         <div style={{
           position: 'absolute', inset: 0, pointerEvents: 'none',
           background: `
-            radial-gradient(ellipse 60% 50% at 80% 20%, rgba(124,111,255,0.12) 0%, transparent 60%),
-            radial-gradient(ellipse 40% 40% at 10% 80%, rgba(46,207,168,0.08) 0%, transparent 60%)
+            radial-gradient(ellipse 60% 50% at 80% 20%, rgba(124,111,255,0.07) 0%, transparent 60%),
+            radial-gradient(ellipse 40% 40% at 10% 80%, rgba(46,207,168,0.05) 0%, transparent 60%)
           `,
         }} />
 
@@ -91,7 +91,7 @@ export default function HomePage() {
               background: 'var(--accent)', color: '#fff',
               fontFamily: 'var(--sans)', fontSize: '14px', fontWeight: 500,
               textDecoration: 'none', letterSpacing: '0.02em',
-              transition: 'background .2s',
+              transition: 'opacity .2s',
             }}>
               Get in touch
             </Link>
@@ -125,15 +125,80 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ── PROFILE ── */}
+      <section style={{ padding: '100px 5vw', background: 'var(--bg)' }}>
+        <div ref={el => { fadeRefs.current[1] = el }} className="fade-in" style={{
+          display: 'grid',
+          gridTemplateColumns: 'auto 1fr',
+          gap: '4rem',
+          alignItems: 'center',
+          maxWidth: '860px',
+        }}>
+          {/* Photo */}
+          <div style={{ flexShrink: 0 }}>
+            <div style={{
+              width: '200px',
+              height: '200px',
+              borderRadius: '24px',
+              overflow: 'hidden',
+              border: '1px solid var(--border2)',
+              background: 'var(--bg2)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              position: 'relative',
+            }}>
+              {/* Replace with <Image src="/profile.jpg" alt="Hyojin Kim" fill style={{objectFit:'cover'}} /> */}
+              <img
+                src="/profile.jpg"
+                alt="Hyojin Kim"
+                style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                onError={e => {
+                  const el = e.currentTarget
+                  el.style.display = 'none'
+                  const parent = el.parentElement
+                  if (parent) {
+                    parent.style.background = 'linear-gradient(135deg, rgba(124,111,255,0.15), rgba(46,207,168,0.1))'
+                    parent.innerHTML = '<span style="font-size:3rem">HK</span>'
+                  }
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Bio */}
+          <div>
+            <div className="section-tag">// About me</div>
+            <h2 style={{ fontSize: 'clamp(1.6rem, 3vw, 2.4rem)', marginBottom: '1rem' }}>
+              Engineer by training,<br />builder by nature
+            </h2>
+            <p style={{ color: 'var(--muted)', lineHeight: 1.85, marginBottom: '1.5rem', maxWidth: '460px' }}>
+              Based in Calgary, AB on a 2-year Working Holiday Visa (extendable to 4 years).
+              I hold an M.S. in Security Information and bring a rare combination of low-level
+              infrastructure knowledge and product-facing development skills.
+            </p>
+            <Link href="/about" style={{
+              display: 'inline-flex', alignItems: 'center', gap: '6px',
+              fontFamily: 'var(--mono)', fontSize: '12px', letterSpacing: '0.06em',
+              color: 'var(--accent)', textDecoration: 'none',
+              borderBottom: '1px solid rgba(124,111,255,0.3)', paddingBottom: '2px',
+              transition: 'border-color .2s',
+            }}>
+              Full work history →
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* ── SKILLS ── */}
       <section style={{ padding: '100px 5vw', background: 'var(--bg2)' }}>
-        <div ref={el => { fadeRefs.current[1] = el }} className="fade-in">
+        <div ref={el => { fadeRefs.current[2] = el }} className="fade-in">
           <div className="section-tag">// Skills</div>
           <h2>What I work with</h2>
           <p className="section-desc">A full stack of capabilities from network infrastructure to front-end development.</p>
         </div>
 
-        <div ref={el => { fadeRefs.current[2] = el }} className="fade-in" style={{
+        <div ref={el => { fadeRefs.current[3] = el }} className="fade-in" style={{
           display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
           gap: '1.5px', background: 'var(--border)',
           border: '1px solid var(--border)', borderRadius: '16px', overflow: 'hidden',
@@ -144,7 +209,7 @@ export default function HomePage() {
               background: 'var(--card)', padding: '2rem',
               transition: 'background .2s',
             }}
-              onMouseEnter={e => (e.currentTarget.style.background = '#22222e')}
+              onMouseEnter={e => (e.currentTarget.style.background = 'var(--card-hover)')}
               onMouseLeave={e => (e.currentTarget.style.background = 'var(--card)')}
             >
               <div style={{

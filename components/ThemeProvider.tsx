@@ -1,0 +1,36 @@
+'use client'
+import { createContext, useContext, useEffect, useState } from 'react'
+
+type Theme = 'light' | 'dark'
+
+const ThemeContext = createContext<{ theme: Theme; toggle: () => void }>({
+  theme: 'light',
+  toggle: () => {},
+})
+
+export function useTheme() {
+  return useContext(ThemeContext)
+}
+
+export function ThemeProvider({ children }: { children: React.ReactNode }) {
+  const [theme, setTheme] = useState<Theme>('light')
+
+  useEffect(() => {
+    // Read from the data-theme attribute set by the inline script (avoids flash)
+    const current = (document.documentElement.getAttribute('data-theme') as Theme) || 'light'
+    setTheme(current)
+  }, [])
+
+  const toggle = () => {
+    const next: Theme = theme === 'light' ? 'dark' : 'light'
+    setTheme(next)
+    document.documentElement.setAttribute('data-theme', next)
+    try { localStorage.setItem('theme', next) } catch {}
+  }
+
+  return (
+    <ThemeContext.Provider value={{ theme, toggle }}>
+      {children}
+    </ThemeContext.Provider>
+  )
+}

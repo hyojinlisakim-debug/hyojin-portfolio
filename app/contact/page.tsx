@@ -3,13 +3,27 @@ import { useState } from 'react'
 
 export default function ContactPage() {
   const [form, setForm] = useState({ name: '', email: '', message: '' })
-  const [sent, setSent] = useState(false)
+  const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    // 나중에 백엔드 API 연결 시 여기에 fetch('/api/contact', ...) 추가
-    console.log('Form submitted:', form)
-    setSent(true)
+    setStatus('sending')
+
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      })
+
+      if (res.ok) {
+        setStatus('sent')
+      } else {
+        setStatus('error')
+      }
+    } catch {
+      setStatus('error')
+    }
   }
 
   return (
@@ -61,7 +75,16 @@ export default function ContactPage() {
           </div>
 
           {/* Contact Form */}
-          {!sent ? (
+          {status === 'sent' ? (
+            <div style={{
+              background: 'rgba(46,207,168,0.06)', border: '1px solid rgba(46,207,168,0.18)',
+              borderRadius: '16px', padding: '3rem', textAlign: 'center',
+            }}>
+              <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>✓</div>
+              <div style={{ fontSize: '18px', fontWeight: 600, marginBottom: '0.5rem' }}>Message sent!</div>
+              <div style={{ color: 'var(--muted)', fontSize: '14px' }}>Thanks for reaching out. I&apos;ll get back to you soon.</div>
+            </div>
+          ) : (
             <form onSubmit={handleSubmit} style={{
               background: 'var(--card)', border: '1px solid var(--border)',
               borderRadius: '16px', padding: '2rem', textAlign: 'left',
@@ -115,25 +138,26 @@ export default function ContactPage() {
                   }}
                 />
               </div>
-              <button type="submit" style={{
-                width: '100%', padding: '12px 28px', borderRadius: '100px',
-                background: 'var(--accent)', color: '#fff',
-                fontFamily: 'var(--sans)', fontSize: '14px', fontWeight: 500,
-                border: 'none', cursor: 'pointer', letterSpacing: '0.02em',
-                transition: 'background .2s',
-              }}>
-                Send message →
+              {status === 'error' && (
+                <p style={{ color: '#e55', fontSize: '13px', marginBottom: '1rem' }}>
+                  Something went wrong. Please try emailing directly.
+                </p>
+              )}
+              <button
+                type="submit"
+                disabled={status === 'sending'}
+                style={{
+                  width: '100%', padding: '12px 28px', borderRadius: '100px',
+                  background: 'var(--accent)', color: '#fff',
+                  fontFamily: 'var(--sans)', fontSize: '14px', fontWeight: 500,
+                  border: 'none', cursor: status === 'sending' ? 'not-allowed' : 'pointer',
+                  letterSpacing: '0.02em', opacity: status === 'sending' ? 0.7 : 1,
+                  transition: 'opacity .2s',
+                }}
+              >
+                {status === 'sending' ? 'Sending…' : 'Send message →'}
               </button>
             </form>
-          ) : (
-            <div style={{
-              background: 'rgba(46,207,168,0.06)', border: '1px solid rgba(46,207,168,0.18)',
-              borderRadius: '16px', padding: '3rem', textAlign: 'center',
-            }}>
-              <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>✓</div>
-              <div style={{ fontSize: '18px', fontWeight: 600, marginBottom: '0.5rem' }}>Message sent!</div>
-              <div style={{ color: 'var(--muted)', fontSize: '14px' }}>Thanks for reaching out. I&apos;ll get back to you soon.</div>
-            </div>
           )}
         </div>
       </section>
