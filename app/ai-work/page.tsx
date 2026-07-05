@@ -2,31 +2,43 @@
 import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 
-type MediaItem = {
+type Project = {
   id: string
-  type: 'image' | 'video'
-  src: string
-  poster?: string
   title: string
-  tool: string
+  tool?: string
+  video?: string
+  images: string[]
 }
 
-// Drop your generated files into /public/ai-work and update the paths below.
-const items: MediaItem[] = [
-  { id: 'piece-01', type: 'image', src: '/ai-work/piece-01.jpg', title: 'Neon Skyline', tool: 'Midjourney' },
-  { id: 'piece-02', type: 'video', src: '/ai-work/piece-02.mp4', poster: '/ai-work/piece-02-poster.jpg', title: 'Ocean Drift', tool: 'Runway' },
-  { id: 'piece-03', type: 'image', src: '/ai-work/piece-03.jpg', title: 'Studio Portrait', tool: 'Midjourney' },
-  { id: 'piece-04', type: 'image', src: '/ai-work/piece-04.jpg', title: 'Glass Architecture', tool: 'DALL·E' },
-  { id: 'piece-05', type: 'video', src: '/ai-work/piece-05.mp4', poster: '/ai-work/piece-05-poster.jpg', title: 'Motion Study', tool: 'Kling' },
-  { id: 'piece-06', type: 'image', src: '/ai-work/piece-06.jpg', title: 'Abstract Texture', tool: 'Midjourney' },
+// Add new work here: drop images into /public/ai-work/images and videos into
+// /public/ai-work/videos, then add a project entry (or push into an existing
+// project's `images` array) pointing at the new file paths.
+const projects: Project[] = [
+  {
+    id: 'kjmaloe-miniature',
+    title: 'KJMaleo Miniature',
+    video: '/ai-work/videos/kjmaloe_miniature_img_video.mp4',
+    images: [
+      '/ai-work/images/kjmaloe_miniature_img_1.png',
+      '/ai-work/images/kjmaloe_miniature_img_2.png',
+      '/ai-work/images/kjmaloe_miniature_img_3.png',
+      '/ai-work/images/kjmaloe_miniature_img_4.png',
+      '/ai-work/images/kjmaloe_miniature_img_5.png',
+    ],
+  },
 ]
 
-const filters = ['All', 'Image', 'Video'] as const
+type Media = { type: 'image' | 'video'; src: string }
+
+function projectMedia(project: Project): Media[] {
+  const media: Media[] = project.video ? [{ type: 'video', src: project.video }] : []
+  return media.concat(project.images.map(src => ({ type: 'image', src })))
+}
 
 export default function AiWorkPage() {
   const fadeRefs = useRef<(HTMLDivElement | null)[]>([])
-  const [filter, setFilter] = useState<(typeof filters)[number]>('All')
-  const [active, setActive] = useState<MediaItem | null>(null)
+  const [openProject, setOpenProject] = useState<Project | null>(null)
+  const [activeIndex, setActiveIndex] = useState(0)
 
   useEffect(() => {
     const observer = new IntersectionObserver((entries) => {
@@ -37,13 +49,23 @@ export default function AiWorkPage() {
   }, [])
 
   useEffect(() => {
-    if (!active) return
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setActive(null) }
+    if (!openProject) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpenProject(null)
+      const media = projectMedia(openProject)
+      if (e.key === 'ArrowRight') setActiveIndex(i => (i + 1) % media.length)
+      if (e.key === 'ArrowLeft') setActiveIndex(i => (i - 1 + media.length) % media.length)
+    }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [active])
+  }, [openProject])
 
-  const visible = items.filter(i => filter === 'All' || i.type === filter.toLowerCase())
+  const openAt = (project: Project, index: number) => {
+    setOpenProject(project)
+    setActiveIndex(index)
+  }
+
+  const activeMedia = openProject ? projectMedia(openProject)[activeIndex] : null
 
   return (
     <div style={{ paddingTop: '60px' }}>
@@ -54,91 +76,107 @@ export default function AiWorkPage() {
           <p className="section-desc">A gallery of images and videos created with AI tools — experiments in prompting, style, and motion.</p>
         </div>
 
-        <div ref={el => { fadeRefs.current[1] = el }} className="fade-in" style={{ display: 'flex', gap: '8px', marginBottom: '2rem' }}>
-          {filters.map(f => (
-            <button
-              key={f}
-              onClick={() => setFilter(f)}
-              className="tag"
-              style={{
-                cursor: 'pointer',
-                color: filter === f ? 'var(--bg)' : 'var(--muted)',
-                background: filter === f ? 'var(--accent)' : undefined,
-                borderColor: filter === f ? 'var(--accent)' : undefined,
-              }}
-            >
-              {f}
-            </button>
-          ))}
-        </div>
-
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
           gap: '1rem',
         }}>
-          {visible.map((item, i) => (
-            <div
-              key={item.id}
-              ref={el => { fadeRefs.current[i + 2] = el }}
-              className="fade-in"
-              onClick={() => setActive(item)}
-              style={{
-                background: 'var(--card)',
-                border: '1px solid var(--border)',
-                borderRadius: '16px',
-                overflow: 'hidden',
-                cursor: 'pointer',
-                transition: 'border-color .2s, transform .2s',
-              }}
-              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.borderColor = 'var(--border2)' }}
-              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = 'var(--border)' }}
-            >
-              <div style={{ position: 'relative', width: '100%', aspectRatio: '4 / 3', background: 'var(--card-hover)' }}>
-                {item.type === 'image' ? (
-                  <Image src={item.src} alt={item.title} fill sizes="(max-width: 768px) 100vw, 33vw" style={{ objectFit: 'cover' }} />
-                ) : (
-                  <video
-                    src={item.src}
-                    poster={item.poster}
-                    muted
-                    loop
-                    playsInline
-                    onMouseEnter={e => e.currentTarget.play()}
-                    onMouseLeave={e => e.currentTarget.pause()}
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                  />
-                )}
+          {projects.map((project, i) => {
+            const coverImage = project.images[0]
+            return (
+              <div
+                key={project.id}
+                ref={el => { fadeRefs.current[i + 1] = el }}
+                className="fade-in"
+                onClick={() => openAt(project, 0)}
+                style={{
+                  background: 'var(--card)',
+                  border: '1px solid var(--border)',
+                  borderRadius: '16px',
+                  overflow: 'hidden',
+                  cursor: 'pointer',
+                  transition: 'border-color .2s, transform .2s',
+                }}
+                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.borderColor = 'var(--border2)' }}
+                onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = 'var(--border)' }}
+              >
+                <div style={{ position: 'relative', width: '100%', aspectRatio: '4 / 3', background: 'var(--card-hover)' }}>
+                  {project.video ? (
+                    <video
+                      src={project.video}
+                      poster={coverImage}
+                      muted
+                      loop
+                      playsInline
+                      onMouseEnter={e => e.currentTarget.play()}
+                      onMouseLeave={e => e.currentTarget.pause()}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    />
+                  ) : (
+                    <Image src={coverImage} alt={project.title} fill sizes="(max-width: 768px) 100vw, 33vw" style={{ objectFit: 'cover' }} />
+                  )}
+                  {project.images.length > 0 && (
+                    <span style={{
+                      position: 'absolute', bottom: '10px', right: '10px',
+                      fontFamily: 'var(--mono)', fontSize: '11px', color: '#fff',
+                      background: 'rgba(0,0,0,0.55)', padding: '3px 8px', borderRadius: '100px',
+                    }}>
+                      {project.images.length} stills
+                    </span>
+                  )}
+                </div>
+                <div style={{ padding: '1rem 1.25rem' }}>
+                  <div style={{ fontSize: '14px', fontWeight: 600, marginBottom: project.tool ? '0.35rem' : 0 }}>{project.title}</div>
+                  {project.tool && (
+                    <div style={{ fontFamily: 'var(--mono)', fontSize: '11px', color: 'var(--accent2)', letterSpacing: '0.04em' }}>{project.tool}</div>
+                  )}
+                </div>
               </div>
-              <div style={{ padding: '1rem 1.25rem' }}>
-                <div style={{ fontSize: '14px', fontWeight: 600, marginBottom: '0.35rem' }}>{item.title}</div>
-                <div style={{ fontFamily: 'var(--mono)', fontSize: '11px', color: 'var(--accent2)', letterSpacing: '0.04em' }}>{item.tool}</div>
-              </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       </section>
 
-      {active && (
+      {openProject && activeMedia && (
         <div
-          onClick={() => setActive(null)}
+          onClick={() => setOpenProject(null)}
           style={{
             position: 'fixed', inset: 0, zIndex: 200,
             background: 'rgba(0,0,0,0.85)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
             padding: '5vw',
           }}
         >
           <div onClick={e => e.stopPropagation()} style={{ maxWidth: '900px', width: '100%' }}>
-            {active.type === 'image' ? (
-              <div style={{ position: 'relative', width: '100%', aspectRatio: '4 / 3' }}>
-                <Image src={active.src} alt={active.title} fill sizes="90vw" style={{ objectFit: 'contain' }} />
-              </div>
-            ) : (
-              <video src={active.src} poster={active.poster} controls autoPlay style={{ width: '100%', maxHeight: '80vh' }} />
-            )}
+            <div style={{ position: 'relative', width: '100%', aspectRatio: '4 / 3' }}>
+              {activeMedia.type === 'image' ? (
+                <Image src={activeMedia.src} alt={openProject.title} fill sizes="90vw" style={{ objectFit: 'contain' }} />
+              ) : (
+                <video src={activeMedia.src} controls autoPlay style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+              )}
+            </div>
+
             <div style={{ marginTop: '1rem', color: '#fff', fontSize: '14px' }}>
-              {active.title} <span style={{ color: 'var(--muted)' }}>·</span> <span style={{ fontFamily: 'var(--mono)', fontSize: '11px' }}>{active.tool}</span>
+              {openProject.title}{openProject.tool && <><span style={{ color: 'var(--muted)' }}> · </span><span style={{ fontFamily: 'var(--mono)', fontSize: '11px' }}>{openProject.tool}</span></>}
+            </div>
+
+            <div style={{ display: 'flex', gap: '8px', marginTop: '1rem', overflowX: 'auto' }}>
+              {projectMedia(openProject).map((m, idx) => (
+                <div
+                  key={idx}
+                  onClick={() => setActiveIndex(idx)}
+                  style={{
+                    position: 'relative', width: '72px', height: '54px', flexShrink: 0,
+                    borderRadius: '6px', overflow: 'hidden', cursor: 'pointer',
+                    border: idx === activeIndex ? '2px solid var(--accent2)' : '2px solid transparent',
+                  }}
+                >
+                  <Image src={m.type === 'video' ? (openProject.images[0] ?? m.src) : m.src} alt="" fill sizes="72px" style={{ objectFit: 'cover' }} />
+                  {m.type === 'video' && (
+                    <span style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '18px', background: 'rgba(0,0,0,0.3)' }}>▶</span>
+                  )}
+                </div>
+              ))}
             </div>
           </div>
         </div>
