@@ -16,6 +16,7 @@ export default function Nav() {
     { href: '/', label: 'Home' },
     { href: '/about', label: 'About' },
     { href: '/projects', label: 'Projects' },
+    { href: '/ai-work', label: 'AI Work' },
     { href: '/contact', label: 'Contact' },
   ]
 
