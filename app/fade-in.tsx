@@ -4,7 +4,7 @@ import { useEffect } from "react";
 
 /**
  * Scroll-reveal for `.fade-in` elements on this page, matching the pattern
- * used on the other pages (about/projects/ai-work/contact) but as a shared
+ * used on the other pages (about/projects/contact) but as a shared
  * component instead of inline duplicated logic. Adds a safety timeout so
  * elements still reveal even if one is never scrolled into view.
  */

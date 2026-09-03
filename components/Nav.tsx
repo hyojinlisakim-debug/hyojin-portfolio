@@ -1,7 +1,7 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useTheme } from './ThemeProvider'
 
 export default function Nav() {
@@ -9,14 +9,18 @@ export default function Nav() {
   const { theme, toggle } = useTheme()
   const [menuOpen, setMenuOpen] = useState(false)
 
-  // Close mobile menu on route change
-  useEffect(() => { setMenuOpen(false) }, [pathname])
+  // Close mobile menu on route change (reset during render, not in an effect —
+  // see https://react.dev/learn/you-might-not-need-an-effect)
+  const [prevPathname, setPrevPathname] = useState(pathname)
+  if (pathname !== prevPathname) {
+    setPrevPathname(pathname)
+    setMenuOpen(false)
+  }
 
   const links = [
     { href: '/', label: 'Home' },
     { href: '/about', label: 'About' },
     { href: '/projects', label: 'Projects' },
-    { href: '/ai-work', label: 'AI Work' },
     { href: '/contact', label: 'Contact' },
   ]
 
