@@ -1,5 +1,6 @@
 import Link from "next/link";
 import FadeIn from "./fade-in";
+import NeuronHero from "@/components/NeuronHero";
 
 export default function Home() {
   return (
@@ -27,10 +28,7 @@ export default function Home() {
           </div>
           <div className="hero-visual">
             <div className="hero-video-frame">
-              <video autoPlay muted loop playsInline aria-hidden="true">
-                <source src="/videos/hero-helix.webm" type="video/webm" />
-                <source src="/videos/hero-helix.mp4" type="video/mp4" />
-              </video>
+              <NeuronHero />
             </div>
           </div>
         </div>

@@ -1,27 +1,31 @@
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Work+Sans:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Public+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@1,6..72,400..500&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* ── LIGHT MODE (default) — warm sand / rose ── */
+/* ── LIGHT MODE (default) — Harbor Signal: marine mist / signal amber ── */
 :root {
-  --sand: #cabfa5;
-  --sand-deep: #b7a986;
-  --sage: #dde2d7;
-  --linen: #f4f1e9;
-  --blush: #e8ddd0;
-  --ink: #26291f;
-  --ink-dim: #5f6355;
-  --ink-faint: #8b8d7c;
-  --rose: #b07f6c;
-  --rose-deep: #93685a;
-  --moss: #7c8768;
-  --line-on-sand: rgba(38,41,31,0.18);
-  --line-on-light: rgba(38,41,31,0.13);
-  --serif: 'Fraunces', 'Iowan Old Style', serif;
-  --sans: 'Work Sans', 'Helvetica Neue', sans-serif;
-  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  --accent-rgb: 147,104,90;
+  --sand: #e6ecea;
+  --sand-deep: #d3dbd8;
+  --sage: #ecf0ee;
+  --linen: #f4f6f5;
+  --blush: #e1e8e9;
+  --ink: #101826;
+  --ink-dim: #55646d;
+  --ink-faint: #8b969c;
+  --rose: #db9a45;
+  --rose-deep: #b8721e;
+  --moss: #187b74;
+  --line-on-sand: rgba(16,24,38,0.16);
+  --line-on-light: rgba(16,24,38,0.12);
+  --serif: 'Bricolage Grotesque', 'Public Sans', sans-serif;
+  --sans: 'Public Sans', 'Helvetica Neue', sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --accent-serif: 'Newsreader', 'Iowan Old Style', serif;
+  --accent-rgb: 184,114,30;
+  --signal-teal: #187b74;
+  --signal-violet: #6a5ea3;
+  --signal-amber: #c67a1f;
 
   /* shared tokens — consumed by Nav/Footer and the about/projects/ai-work/contact pages */
   --bg: var(--linen);
@@ -35,25 +39,28 @@
   --accent: var(--rose-deep);
   --accent2: var(--rose);
   --teal: var(--moss);
-  --nav-bg: rgba(244,241,233,0.88);
+  --nav-bg: rgba(244,246,245,0.88);
 }
 
-/* ── DARK MODE — warm ink / brass ── */
+/* ── DARK MODE — Harbor Signal: marine ink / signal amber ── */
 [data-theme="dark"] {
-  --sand: #221e17;
-  --sand-deep: #29241c;
-  --sage: #26231c;
-  --linen: #15130f;
-  --blush: #201c15;
-  --ink: #ece4d3;
-  --ink-dim: #9c9280;
-  --ink-faint: #6f6759;
-  --rose: #e0bd85;
-  --rose-deep: #c39a5c;
-  --moss: #7c8768;
-  --line-on-sand: rgba(230,217,194,0.16);
-  --line-on-light: rgba(230,217,194,0.13);
-  --accent-rgb: 195,154,92;
+  --sand: #13232b;
+  --sand-deep: #0a151a;
+  --sage: #16262e;
+  --linen: #0d1a20;
+  --blush: #1a2c33;
+  --ink: #edede6;
+  --ink-dim: #9db0b5;
+  --ink-faint: #6d7f84;
+  --rose: #f6c179;
+  --rose-deep: #f0a94d;
+  --moss: #5cc9bd;
+  --line-on-sand: rgba(237,237,230,0.16);
+  --line-on-light: rgba(237,237,230,0.12);
+  --accent-rgb: 240,169,77;
+  --signal-teal: #5cc9bd;
+  --signal-violet: #a78bfa;
+  --signal-amber: #f0a94d;
 
   --bg: var(--linen);
   --bg2: var(--sand);
@@ -66,7 +73,7 @@
   --accent: var(--rose-deep);
   --accent2: var(--rose);
   --teal: var(--moss);
-  --nav-bg: rgba(21,19,15,0.86);
+  --nav-bg: rgba(13,26,32,0.86);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -317,10 +324,11 @@ h2 {
 .hero-video-frame {
   position: relative; width: min(430px, 100%); aspect-ratio: 1 / 1; border-radius: 50%;
   overflow: hidden; background: var(--sand-deep);
-  box-shadow: 0 40px 80px -24px rgba(38,41,31,0.4);
+  box-shadow: 0 40px 80px -24px rgba(16,24,38,0.4);
 }
-.hero-video-frame video {
-  width: 100%; height: 100%; object-fit: cover; display: block;
+.hero-video-frame video,
+.hero-video-frame canvas {
+  width: 100%; height: 100%; object-fit: cover; display: block; cursor: crosshair;
 }
 .hero-video-frame::after {
   content: ''; position: absolute; inset: 0; border-radius: 50%;
