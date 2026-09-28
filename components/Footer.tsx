@@ -7,7 +7,7 @@ export default function Footer() {
       flexWrap: 'wrap', gap: '1rem',
     }}>
       <span style={{ fontSize: '12px', color: 'var(--muted)' }}>
-        © 2025 Hyojin Kim. Built for opportunities.
+        &copy; {new Date().getFullYear()} Hyojin Kim. Built for opportunities.
       </span>
       <a href="#" style={{
         fontFamily: 'var(--mono)', fontSize: '11px', color: 'var(--muted)',

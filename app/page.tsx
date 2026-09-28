@@ -120,7 +120,7 @@ export default function Home() {
 
           <div className="exp-item">
             <div className="exp-header">
-              <span className="exp-company">Commercial (Canada)<span className="exp-badge">Current</span></span>
+              <span className="exp-company">Total Trading Inc.<span className="exp-badge">Current</span></span>
               <span className="exp-period">2025 — Present · Calgary, AB</span>
             </div>
             <div className="exp-role">Shopify Web Designer &amp; Section Developer</div>
