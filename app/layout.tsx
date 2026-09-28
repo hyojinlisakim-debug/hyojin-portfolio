@@ -5,6 +5,7 @@ import Footer from '@/components/Footer'
 import { ThemeProvider } from '@/components/ThemeProvider'
 import PageTransition from '@/components/PageTransition'
 import ChatWidget from '@/components/ChatWidget'
+import Cursor from '@/components/Cursor'
 
 export const metadata: Metadata = {
   title: 'Hyojin Kim — Portfolio',
@@ -56,6 +57,8 @@ export default function RootLayout({
       </head>
       <body suppressHydrationWarning>
         <ThemeProvider>
+          <div className="grain-overlay" aria-hidden="true" />
+          <Cursor />
           <Nav />
           <main>
             <PageTransition>{children}</PageTransition>

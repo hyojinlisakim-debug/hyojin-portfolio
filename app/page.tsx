@@ -1,6 +1,9 @@
+import type { CSSProperties } from "react";
 import Link from "next/link";
 import FadeIn from "./fade-in";
 import NeuronHero from "@/components/NeuronHero";
+import Magnetic from "@/components/Magnetic";
+import CountUp from "@/components/CountUp";
 
 export default function Home() {
   return (
@@ -11,19 +14,22 @@ export default function Home() {
         <div className="hero-inner">
           <div className="hero-copy">
             <div className="eyebrow">Available for opportunities in Canada</div>
-            <h1>Hyojin <em>Kim</em></h1>
+            <h1 className="reveal-heading">
+              <span className="reveal-word" style={{ "--reveal-delay": "0.05s" } as CSSProperties}>Hyojin</span>{" "}
+              <span className="reveal-word" style={{ "--reveal-delay": "0.2s" } as CSSProperties}><em>Kim</em></span>
+            </h1>
             <p className="hero-desc">
               Software Engineer &amp; IT Specialist with 5+ years bridging infrastructure, automation, and web development. From network uptime at mission-critical ports to Shopify storefronts — I build things that work.
             </p>
             <div className="hero-ctas">
-              <Link className="btn btn-primary" href="/contact">Get in touch</Link>
-              <a className="btn btn-outline" href="#experience">View experience</a>
+              <Magnetic><Link className="btn btn-primary" href="/contact">Get in touch</Link></Magnetic>
+              <Magnetic><a className="btn btn-outline" href="#experience">View experience</a></Magnetic>
             </div>
             <div className="hero-stats">
-              <div><span className="stat-num">5+</span><span className="stat-label">Years experience</span></div>
-              <div><span className="stat-num">50%</span><span className="stat-label">Reporting time saved</span></div>
-              <div><span className="stat-num">99.9%</span><span className="stat-label">Network uptime</span></div>
-              <div><span className="stat-num">80+</span><span className="stat-label">Issues resolved</span></div>
+              <div><span className="stat-num"><CountUp end={5} suffix="+" /></span><span className="stat-label">Years experience</span></div>
+              <div><span className="stat-num"><CountUp end={50} suffix="%" /></span><span className="stat-label">Reporting time saved</span></div>
+              <div><span className="stat-num"><CountUp end={99.9} suffix="%" decimals={1} /></span><span className="stat-label">Network uptime</span></div>
+              <div><span className="stat-num"><CountUp end={80} suffix="+" /></span><span className="stat-label">Issues resolved</span></div>
             </div>
           </div>
           <div className="hero-visual">
@@ -35,7 +41,24 @@ export default function Home() {
             </div>
           </div>
         </div>
+        <div className="scroll-cue">Scroll</div>
       </section>
+
+      {/* MARQUEE */}
+      <div className="marquee" aria-hidden="true">
+        <div className="marquee-track">
+          {Array.from({ length: 2 }).map((_, i) => (
+            <span key={i} style={{ display: "contents" }}>
+              <span>AVAILABLE FOR HIRE</span>
+              <span>SOFTWARE ENGINEER</span>
+              <span>SHOPIFY DEVELOPMENT</span>
+              <span>PYTHON AUTOMATION</span>
+              <span>AWS INFRASTRUCTURE</span>
+              <span>BASED IN CALGARY</span>
+            </span>
+          ))}
+        </div>
+      </div>
 
       {/* SKILLS */}
       <section id="skills">
