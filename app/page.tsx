@@ -35,9 +35,6 @@ export default function Home() {
           <div className="hero-visual">
             <div className="hero-stage">
               <div className="hero-neuron-backdrop"><NeuronHero /></div>
-              <div className="hero-video-frame">
-                <video autoPlay muted loop playsInline aria-hidden="true" src="/videos/profile-hero.mp4" />
-              </div>
             </div>
           </div>
         </div>
