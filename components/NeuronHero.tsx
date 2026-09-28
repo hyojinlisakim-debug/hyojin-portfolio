@@ -126,6 +126,9 @@ export default function NeuronHero() {
     let pointerActive = false
     let moveEnergy = 0
     let lastPt: { x: number; y: number; t: number } | null = null
+    // Tracked on window (not the canvas) because the backdrop is
+    // pointer-events:none — this canvas never receives its own pointer
+    // events, so reactivity has to key off the page-wide cursor position.
     function onMove(e: PointerEvent) {
       const rect = canvas!.getBoundingClientRect()
       const px = e.clientX - rect.left - rect.width / 2
@@ -137,13 +140,13 @@ export default function NeuronHero() {
         const dt = Math.max(1, now - lastPt.t)
         const dx = e.clientX - lastPt.x, dy = e.clientY - lastPt.y
         const speed = Math.sqrt(dx * dx + dy * dy) / dt
-        moveEnergy = Math.min(1, moveEnergy + speed * 0.12)
+        moveEnergy = Math.min(1, moveEnergy + speed * 0.2)
       }
       lastPt = { x: e.clientX, y: e.clientY, t: now }
     }
     function onLeave() { pointerActive = false }
-    canvas.addEventListener('pointermove', onMove, { passive: true })
-    canvas.addEventListener('pointerleave', onLeave, { passive: true })
+    window.addEventListener('pointermove', onMove, { passive: true })
+    document.documentElement.addEventListener('mouseleave', onLeave)
 
     const mq = window.matchMedia('(prefers-color-scheme: dark)')
     const onSchemeChange = () => refreshColors()
@@ -243,8 +246,8 @@ export default function NeuronHero() {
       ro.disconnect()
       mo.disconnect()
       mq.removeEventListener?.('change', onSchemeChange)
-      canvas.removeEventListener('pointermove', onMove)
-      canvas.removeEventListener('pointerleave', onLeave)
+      window.removeEventListener('pointermove', onMove)
+      document.documentElement.removeEventListener('mouseleave', onLeave)
     }
   }, [])
 
