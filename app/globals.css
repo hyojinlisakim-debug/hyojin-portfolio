@@ -552,7 +552,7 @@ h2 {
   display: flex; align-items: center; justify-content: center;
   background: var(--card-hover);
 }
-.project-icon { width: 96px; height: 96px; opacity: 0.9; }
+.project-icon { width: 96px; height: 96px; margin: 0; opacity: 0.9; }
 .project-cell { padding: 3rem 2.4rem; }
 .project-cell:nth-child(6n+1) { background: var(--blush); }
 .project-cell:nth-child(6n+2) { background: var(--sage); }

@@ -68,7 +68,7 @@ function ProjectIcon({ id }: { id: IconId }) {
     ),
   }
   return (
-    <svg className="project-icon" viewBox="0 0 74 74">
+    <svg className="project-icon cell-icon" viewBox="0 0 74 74">
       <circle className="frame" cx="37" cy="37" r="30" />
       {paths[id]}
     </svg>
