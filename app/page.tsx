@@ -204,7 +204,9 @@ export default function Home() {
             <div className="project-meta"><b>50%</b> reporting time saved — Python, SQL, AWS</div>
           </div>
           <div className="project-cell">
-            <div className="project-visual visual-integration" aria-hidden="true"><span/><span/><span/><i/><i/></div>
+            <div className="project-visual project-image" aria-hidden="true">
+              <Image src="/images/generated/eam-sap-api-bridge-v2.png" alt="" fill sizes="(max-width: 640px) 100vw, (max-width: 980px) 50vw, 33vw" />
+            </div>
             <div className="project-number">02 / 06</div>
             <div className="project-eyebrow">Integration</div>
             <div className="project-title">EAM ↔ SAP API Bridge</div>
