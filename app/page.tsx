@@ -1,5 +1,6 @@
 import type { CSSProperties } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import FadeIn from "./fade-in";
 import NeuronHero from "@/components/NeuronHero";
 import Magnetic from "@/components/Magnetic";
@@ -7,12 +8,13 @@ import CountUp from "@/components/CountUp";
 
 export default function Home() {
   return (
-    <>
+    <div className="home-v2">
       <FadeIn />
       {/* HERO */}
       <section id="hero">
         <div className="hero-inner">
           <div className="hero-copy">
+            <div className="hero-kicker"><span>01</span> Engineer · Designer · Systems thinker</div>
             <div className="eyebrow">Available for opportunities in Canada</div>
             <h1 className="reveal-heading">
               <span className="reveal-word" style={{ "--reveal-delay": "0.05s" } as CSSProperties}>Hyojin</span>{" "}
@@ -21,9 +23,13 @@ export default function Home() {
             <p className="hero-desc">
               Software Engineer &amp; IT Specialist with 5+ years bridging infrastructure, automation, and web development. From network uptime at mission-critical ports to Shopify storefronts — I build things that work.
             </p>
+            <div className="hero-disciplines" aria-label="Core disciplines">
+              <span>UI / UX</span><span>Backend</span><span>Network</span><span>Cloud</span><span>AI</span>
+            </div>
             <div className="hero-ctas">
               <Magnetic><Link className="btn btn-primary" href="/contact">Get in touch</Link></Magnetic>
-              <Magnetic><a className="btn btn-outline" href="#experience">View experience</a></Magnetic>
+              <Magnetic><a className="btn btn-outline" href="/Hyojin_Kim_Resume.pdf" target="_blank" rel="noreferrer">View résumé</a></Magnetic>
+              <a className="hero-text-link" href="https://github.com/hyojinlisakim-debug" target="_blank" rel="noreferrer">GitHub ↗</a>
             </div>
             <div className="hero-stats">
               <div><span className="stat-num"><CountUp end={5} suffix="+" /></span><span className="stat-label">Years experience</span></div>
@@ -34,7 +40,14 @@ export default function Home() {
           </div>
           <div className="hero-visual">
             <div className="hero-stage">
+              <div className="hero-orbit orbit-one" aria-hidden="true" />
+              <div className="hero-orbit orbit-two" aria-hidden="true" />
+              <div className="hero-art-image" aria-hidden="true">
+                <Image src="/images/generated/neural-hero-v2.png" alt="" fill priority sizes="(max-width: 860px) 90vw, 48vw" />
+              </div>
               <div className="hero-neuron-backdrop"><NeuronHero /></div>
+              <div className="hero-visual-label label-top">Interactive neural field</div>
+              <div className="hero-visual-label label-bottom"><span>Live</span> Move your cursor</div>
             </div>
           </div>
         </div>
@@ -180,37 +193,59 @@ export default function Home() {
           <p className="section-desc">Key projects that demonstrate impact across software, infrastructure, and commerce.</p>
         </div>
         <div className="project-grid fade-in">
-          <div className="project-cell">
+          <div className="project-cell project-featured">
+            <div className="project-visual project-image" aria-hidden="true">
+              <Image src="/images/generated/automation-system-v2.png" alt="" fill sizes="(max-width: 640px) 100vw, (max-width: 980px) 50vw, 33vw" />
+            </div>
+            <div className="project-number">01 / 06</div>
             <div className="project-eyebrow">Automation</div>
             <div className="project-title">EAM Automation for GS Power</div>
             <div className="project-desc">Python/SQL workflows syncing plant machinery performance data to an AWS-based Enterprise Asset Management system. Enabled predictive maintenance and 100% data availability for audits.</div>
             <div className="project-meta"><b>50%</b> reporting time saved — Python, SQL, AWS</div>
           </div>
           <div className="project-cell">
+            <div className="project-visual visual-integration" aria-hidden="true"><span/><span/><span/><i/><i/></div>
+            <div className="project-number">02 / 06</div>
             <div className="project-eyebrow">Integration</div>
             <div className="project-title">EAM ↔ SAP API Bridge</div>
             <div className="project-desc">Cross-platform API integration between Hexagon&apos;s EAM and SAP-based partner systems, consolidating asset status data and automating maintenance scheduling across stakeholders.</div>
             <div className="project-meta"><b>Full automation</b> — REST API, SAP, SSO</div>
           </div>
           <div className="project-cell">
+            <div className="project-visual project-image" aria-hidden="true">
+              <Image src="/images/generated/maritime-network-v2.png" alt="" fill sizes="(max-width: 640px) 100vw, (max-width: 980px) 50vw, 33vw" />
+            </div>
+            <div className="project-number">03 / 06</div>
             <div className="project-eyebrow">Infrastructure</div>
             <div className="project-title">Maritime Port Network Operations</div>
             <div className="project-desc">24/7 network infrastructure for AI-driven national maritime control rooms across 9 major Korean ports. Managed 40+ devices, 1,000+ endpoints, zero critical outages over 3+ years.</div>
             <div className="project-meta"><b>99.9%</b> uptime — Cisco, Linux, IoT</div>
           </div>
           <div className="project-cell">
+            <div className="project-visual project-image" aria-hidden="true">
+              <Image src="/images/generated/commerce-experience-v2.png" alt="" fill sizes="(max-width: 640px) 100vw, (max-width: 980px) 50vw, 33vw" />
+            </div>
+            <div className="project-number">04 / 06</div>
             <div className="project-eyebrow">Commerce</div>
             <div className="project-title">Shopify Storefront Development</div>
             <div className="project-desc">Full Shopify web design and development at a Canadian commercial client — UX planning, custom section development with Liquid/JS, and responsive UI implementation.</div>
             <div className="project-meta"><b>Live production</b> — Shopify, Liquid, CSS</div>
           </div>
           <div className="project-cell">
+            <div className="project-visual project-image" aria-hidden="true">
+              <Image src="/images/generated/deployment-pipeline-v2.png" alt="" fill sizes="(max-width: 640px) 100vw, (max-width: 980px) 50vw, 33vw" />
+            </div>
+            <div className="project-number">05 / 06</div>
             <div className="project-eyebrow">Go-Live</div>
             <div className="project-title">Hexagon EAM Pre-Live Deployment</div>
             <div className="project-desc">Collaborated with Hexagon India team to resolve 80+ front- and back-end issues during pre-go-live phase. Managed bilingual technical communication to accelerate issue resolution.</div>
             <div className="project-meta"><b>80+</b> issues resolved — English/Korean</div>
           </div>
           <div className="project-cell">
+            <div className="project-visual project-image" aria-hidden="true">
+              <Image src="/images/generated/network-security-v2.png" alt="" fill sizes="(max-width: 640px) 100vw, (max-width: 980px) 50vw, 33vw" />
+            </div>
+            <div className="project-number">06 / 06</div>
             <div className="project-eyebrow">Security</div>
             <div className="project-title">Network Segmentation &amp; Firewall</div>
             <div className="project-desc">Designed and implemented firewall policies and ACL rules for secure segmentation of a complex network with 1,000+ endpoints including IoT and server infrastructure.</div>
@@ -325,6 +360,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-    </>
+    </div>
   );
 }
