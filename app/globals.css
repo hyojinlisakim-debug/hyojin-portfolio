@@ -771,8 +771,24 @@ h2 {
   .home-v2 .hero-desc { margin-left: 0; }
   .home-v2 .hero-ctas { justify-content: flex-start; }
   .home-v2 .hero-stats { margin-left: 0; }
-  .home-v2 .hero-stage { width: min(470px, 90vw); }
-  .home-v2 .hero-visual { align-self: center; }
+  .home-v2 .hero-visual { width: 100%; align-self: center; }
+  .home-v2 .hero-stage {
+    width: 100%; max-width: 680px; aspect-ratio: 16 / 10;
+    border: 1px solid var(--line-on-sand); overflow: hidden; background: #07151e;
+  }
+  .hero-art-image {
+    inset: 0; border-radius: 0; opacity: 1;
+    -webkit-mask-image: none; mask-image: none;
+  }
+  .hero-art-image::after {
+    background: linear-gradient(180deg, transparent 52%, rgba(4,12,18,.72));
+    mix-blend-mode: normal; opacity: 1;
+  }
+  .hero-art-image img { object-position: 70% center; transform: scale(1.03); animation: none; }
+  .home-v2 .hero-neuron-backdrop, .hero-orbit { display: none; }
+  .hero-visual-label.label-top { display: none; }
+  .hero-visual-label.label-bottom { left: 1rem; bottom: 1rem; background: rgba(7,21,30,.78); color: rgba(255,255,255,.76); border-color: rgba(255,255,255,.22); }
+  .home-v2 .scroll-cue { display: none; }
 }
 @media (max-width: 640px) {
   .home-v2 #hero { background-size: 44px 44px; padding-left: 1.25rem; padding-right: 1.25rem; }
@@ -789,6 +805,9 @@ h2 {
   .project-cell:has(.project-image)::after, .project-featured:has(.project-image)::after, .project-cell:nth-child(4):has(.project-image)::after { height: auto; aspect-ratio: 16 / 10; }
   .home-v2 .project-cell { padding: 1rem; }
   .home-v2 .project-title { font-size: 1.45rem; }
+  .home-v2 .hero-inner { gap: 2.25rem; }
+  .home-v2 .hero-stage { aspect-ratio: 4 / 3; }
+  .home-v2 .hero-stats { padding-top: 1.75rem; }
   .home-v2 .exp-item { grid-template-columns: 1fr; gap: 1rem; }
   .home-v2 .exp-role, .home-v2 .exp-bullets, .home-v2 .exp-tech { grid-column: 1; }
 }
@@ -796,6 +815,9 @@ h2 {
   .home-v2 #hero { padding-left: 1rem; padding-right: 1rem; }
   .home-v2 .hero-copy h1 { font-size: clamp(4rem, 22vw, 5.4rem); }
   .home-v2 .hero-desc { font-size: 14px; line-height: 1.65; }
+  .home-v2 .hero-stage { aspect-ratio: 1 / 1; }
+  .hero-art-image img { object-position: 73% center; }
+  .hero-visual-label.label-bottom { left: .75rem; bottom: .75rem; font-size: 8px; }
   .home-v2 .btn { width: 100%; text-align: center; }
   .home-v2 .hero-ctas { gap: .75rem; }
   .home-v2 .home-section-head h2 { font-size: clamp(2.8rem, 14vw, 4rem); }
