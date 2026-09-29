@@ -757,17 +757,38 @@ h2 {
 .home-v2 .contact-box { max-width: 920px; }
 .home-v2 .contact-box h2 { font-size: clamp(3.5rem, 8vw, 8rem); letter-spacing: -.065em; line-height: .9; margin-bottom: 2rem; }
 
+@media (min-width: 1181px) {
+  .home-v2 .hero-inner { display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(420px, .92fr); }
+}
+@media (min-width: 861px) and (max-width: 1180px) {
+  .home-v2 #hero { padding-top: 7.5rem; }
+  .home-v2 .hero-inner { display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(330px, .92fr); gap: 3vw; }
+  .home-v2 .hero-copy h1 { font-size: clamp(4.6rem, 8.4vw, 7.4rem); margin-bottom: 2rem; }
+  .home-v2 .hero-desc { font-size: 15px; }
+  .home-v2 .hero-stage { width: min(500px, 42vw); }
+  .home-v2 .hero-stats { grid-template-columns: repeat(2, 1fr); row-gap: 1.25rem; }
+  .home-v2 .hero-stats > div:nth-child(2) { border-right: 0; }
+  .home-v2 .hero-stats > div:nth-child(3) { padding-left: 0; }
+}
+@media (min-width: 861px) and (max-height: 780px) {
+  .home-v2 #hero { padding-top: 6.5rem; padding-bottom: 2.5rem; }
+  .home-v2 .hero-inner { min-height: calc(100svh - 9rem); }
+  .home-v2 .hero-copy h1 { margin-top: .8rem; margin-bottom: 1.4rem; }
+  .home-v2 .hero-desc { margin-bottom: 1.8rem; }
+  .home-v2 .hero-ctas { margin-bottom: 2rem; }
+  .home-v2 .hero-stats { padding-top: 1.5rem; }
+}
 @media (max-width: 980px) {
   .home-v2 .home-section-head { grid-template-columns: 1fr; gap: 1rem; }
   .home-v2 .project-cell, .home-v2 .project-featured, .home-v2 .project-cell:nth-child(4), .home-v2 .project-cell:nth-child(5), .home-v2 .project-cell:nth-child(6) { grid-column: span 6; }
   .project-featured .project-image, .project-cell:nth-child(4) .project-image { height: 210px; }
   .project-featured:has(.project-image)::after, .project-cell:nth-child(4):has(.project-image)::after { height: 210px; }
-  .home-v2 .hero-copy h1 { font-size: clamp(5rem, 16vw, 8.5rem); }
 }
 @media (max-width: 860px) {
-  .home-v2 #hero { padding-top: 7rem; }
+  .home-v2 #hero { min-height: auto; padding-top: 7rem; padding-bottom: 4.5rem; }
   .home-v2 .hero-inner { min-height: auto; text-align: left; }
   .home-v2 .hero-copy { text-align: left; }
+  .home-v2 .hero-copy h1 { font-size: clamp(4.75rem, 14vw, 7.2rem); line-height: .8; }
   .home-v2 .hero-desc { margin-left: 0; }
   .home-v2 .hero-ctas { justify-content: flex-start; }
   .home-v2 .hero-stats { margin-left: 0; }
@@ -791,8 +812,11 @@ h2 {
   .home-v2 .scroll-cue { display: none; }
 }
 @media (max-width: 640px) {
-  .home-v2 #hero { background-size: 44px 44px; padding-left: 1.25rem; padding-right: 1.25rem; }
-  .home-v2 .hero-copy h1 { font-size: clamp(4.5rem, 24vw, 7rem); }
+  .home-v2 #hero { background-size: 44px 44px; padding: 6.25rem 1.25rem 3.5rem; }
+  .home-v2 .hero-copy h1 { font-size: clamp(4.3rem, 19vw, 6.5rem); margin: 1rem 0 1.75rem; }
+  .home-v2 .hero-desc { margin-bottom: 2.25rem; }
+  .hero-disciplines { margin-bottom: 2rem; }
+  .home-v2 .hero-ctas { margin-bottom: 2.25rem; }
   .home-v2 .hero-stats { grid-template-columns: repeat(2, 1fr); row-gap: 1.5rem; }
   .home-v2 .hero-stats > div:nth-child(2) { border-right: 0; }
   .home-v2 .hero-stats > div:nth-child(3) { padding-left: 0; }
@@ -812,14 +836,17 @@ h2 {
   .home-v2 .exp-role, .home-v2 .exp-bullets, .home-v2 .exp-tech { grid-column: 1; }
 }
 @media (max-width: 420px) {
-  .home-v2 #hero { padding-left: 1rem; padding-right: 1rem; }
-  .home-v2 .hero-copy h1 { font-size: clamp(4rem, 22vw, 5.4rem); }
+  .home-v2 #hero { padding: 5.75rem 1rem 3rem; }
+  .home-v2 .hero-copy h1 { font-size: clamp(3.7rem, 20vw, 5.1rem); }
   .home-v2 .hero-desc { font-size: 14px; line-height: 1.65; }
   .home-v2 .hero-stage { aspect-ratio: 1 / 1; }
   .hero-art-image img { object-position: 73% center; }
   .hero-visual-label.label-bottom { left: .75rem; bottom: .75rem; font-size: 8px; }
   .home-v2 .btn { width: 100%; text-align: center; }
   .home-v2 .hero-ctas { gap: .75rem; }
+  .home-v2 .hero-stats { column-gap: 0; row-gap: 1.25rem; }
+  .home-v2 .stat-num { font-size: 1.2rem; }
+  .home-v2 .stat-label { font-size: 9px; letter-spacing: .06em; }
   .home-v2 .home-section-head h2 { font-size: clamp(2.8rem, 14vw, 4rem); }
   .home-v2 .cell { padding: 3rem 1.4rem; }
   .home-v2 #projects, .home-v2 #experience, .home-v2 #education, .home-v2 #contact { padding-left: 1rem; padding-right: 1rem; }
