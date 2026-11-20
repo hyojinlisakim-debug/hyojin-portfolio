@@ -1,11 +1,12 @@
 'use client'
 import { useEffect, useRef, useState, type ReactElement } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 
 type Category = 'dev' | 'design' | 'ai'
 type Media = { type: 'image' | 'video'; src: string }
 
-type IconId = 'automation' | 'bridge' | 'network' | 'commerce' | 'golive' | 'shield'
+type IconId = 'automation' | 'bridge' | 'network' | 'commerce' | 'golive' | 'shield' | 'sheet'
 
 type Project = {
   id: string
@@ -17,6 +18,8 @@ type Project = {
   categories: Category[]
   media?: Media[]
   icon?: IconId
+  href?: string
+  linkLabel?: string
 }
 
 function ProjectIcon({ id }: { id: IconId }) {
@@ -58,6 +61,14 @@ function ProjectIcon({ id }: { id: IconId }) {
         <path className="stroke" d="M37 51 V23" />
         <path className="stroke" d="M37 23 L49 29.5 L37 36" />
         <circle className="dot-rose" cx="37" cy="23" r="2" />
+      </>
+    ),
+    sheet: (
+      <>
+        <rect className="stroke" x="20" y="22" width="34" height="30" />
+        <path className="stroke" d="M20 31 H54 M20 41 H54 M31 22 V52" />
+        <circle className="dot-rose" cx="47" cy="36" r="2" />
+        <circle className="dot-moss" cx="42" cy="46" r="1.6" />
       </>
     ),
     shield: (
@@ -159,6 +170,18 @@ const projects: Project[] = [
       { type: 'image', src: '/ai-work/images/kjmaloe_miniature_img_4.png' },
       { type: 'image', src: '/ai-work/images/kjmaloe_miniature_img_5.png' },
     ],
+  },
+  {
+    id: 'excel-ai',
+    num: '08 — AI Tool',
+    title: 'AI Excel Data Processor',
+    desc: 'Upload any spreadsheet and describe the task in plain English, Korean, or French. An AI plans the steps (clean, look up, group, reconcile), the browser computes every number, and each step shows its Excel formula. Demoed on synthetic utility billing data.',
+    meta: 'Live demo',
+    stack: 'Next.js, TypeScript, Claude API',
+    categories: ['dev', 'ai'],
+    icon: 'sheet',
+    href: '/lab/excel-ai',
+    linkLabel: 'Open the tool',
   },
 ]
 
@@ -313,6 +336,11 @@ export default function ProjectsClient() {
                   <div style={{ fontFamily: 'var(--mono)', fontSize: '11px', color: 'var(--teal)', display: 'flex', alignItems: 'center', gap: '6px', letterSpacing: '0.04em' }}>
                     {p.meta} <span style={{ color: 'var(--muted)' }}>·</span> {p.stack}
                   </div>
+                  {p.href && (
+                    <Link href={p.href} className="research-cta" style={{ marginTop: '1.1rem' }}>
+                      {p.linkLabel ?? 'Open'} →
+                    </Link>
+                  )}
                 </div>
               </div>
             )
