@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { OP_NAMES } from '@/lib/excel-ai/ops'
+import { ACCESS_COOKIE, hasAccess } from '@/lib/excel-ai/access'
 
 // Sonnet plans multi-step transformations noticeably more reliably than Haiku;
 // requests are short (schema only), so cost stays low. Override with EXCEL_AI_MODEL.
@@ -113,6 +114,9 @@ async function callClaude(apiKey: string, body: Record<string, unknown>) {
 
 export async function POST(request: NextRequest) {
   try {
+    if (!hasAccess(request.cookies.get(ACCESS_COOKIE)?.value)) {
+      return NextResponse.json({ error: 'locked' }, { status: 401 })
+    }
     const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown'
     if (isRateLimited(ip)) return NextResponse.json({ error: 'rate_limited' }, { status: 429 })
 

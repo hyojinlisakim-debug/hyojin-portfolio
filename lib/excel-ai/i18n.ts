@@ -3,6 +3,14 @@ import type { Op } from './ops'
 
 const en = {
   langName: 'English',
+  gateTitle: 'This demo is password-protected',
+  gateDesc: 'The AI features call a paid API, so access is limited. Enter the password you received to open the tool.',
+  gatePassword: 'Password',
+  gateSubmit: 'Open the tool',
+  gateChecking: 'Checking…',
+  gateWrong: 'That password is not correct. Try again.',
+  gateTooMany: 'Too many attempts. Try again in 10 minutes.',
+  errLocked: 'Your access has expired. Reload the page and enter the password again.',
   tag: '// Lab — AI tool',
   title: 'AI Excel data processor',
   subtitle: 'Upload any spreadsheet and describe what you need in plain language. The AI writes a step-by-step plan, your browser runs it, and every step comes with the matching Excel formula.',
@@ -107,6 +115,14 @@ export type Dict = typeof en
 
 const ko: Dict = {
   langName: '한국어',
+  gateTitle: '비밀번호로 보호된 데모예요',
+  gateDesc: 'AI 기능은 유료 API를 사용해서 접근을 제한하고 있어요. 받으신 비밀번호를 입력하면 도구가 열려요.',
+  gatePassword: '비밀번호',
+  gateSubmit: '도구 열기',
+  gateChecking: '확인하는 중…',
+  gateWrong: '비밀번호가 맞지 않아요. 다시 입력해 주세요.',
+  gateTooMany: '시도 횟수가 너무 많아요. 10분 뒤에 다시 해 주세요.',
+  errLocked: '접근 시간이 만료됐어요. 페이지를 새로고침하고 비밀번호를 다시 입력해 주세요.',
   tag: '// Lab — AI 도구',
   title: 'AI 엑셀 데이터 가공',
   subtitle: '어떤 스프레드시트든 올리고 필요한 작업을 평소 말로 요청하세요. AI가 단계별 계획을 세우면 브라우저가 실행하고, 단계마다 같은 작업을 하는 엑셀 수식을 함께 보여줘요.',
@@ -209,6 +225,14 @@ const ko: Dict = {
 
 const fr: Dict = {
   langName: 'Français',
+  gateTitle: 'Cette démo est protégée par un mot de passe',
+  gateDesc: 'Les fonctions d’IA utilisent une API payante, l’accès est donc limité. Entrez le mot de passe reçu pour ouvrir l’outil.',
+  gatePassword: 'Mot de passe',
+  gateSubmit: 'Ouvrir l’outil',
+  gateChecking: 'Vérification…',
+  gateWrong: 'Ce mot de passe est incorrect. Réessayez.',
+  gateTooMany: 'Trop de tentatives. Réessayez dans 10 minutes.',
+  errLocked: 'Votre accès a expiré. Rechargez la page et entrez de nouveau le mot de passe.',
   tag: '// Lab — outil IA',
   title: 'Traitement de données Excel par IA',
   subtitle: 'Importez n’importe quel classeur et décrivez ce dont vous avez besoin en langage courant. L’IA rédige un plan étape par étape, votre navigateur l’exécute, et chaque étape est accompagnée de la formule Excel correspondante.',

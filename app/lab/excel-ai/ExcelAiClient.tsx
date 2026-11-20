@@ -4,40 +4,20 @@ import { type Cell, type ColumnFormat, type Lang, type Table, type Workbook, MAX
 import { type Op, type StepResult, profile, runPipeline, summarize, toCsv, validateOp } from '@/lib/excel-ai/ops'
 import { FileReadError, readCsv, readXlsx, writeXlsx } from '@/lib/excel-ai/xlsx'
 import { DICTS, LANGS, LOCALES, type Dict, describeStep, fmt } from '@/lib/excel-ai/i18n'
+import { readLang, serverLang, subscribeLang, writeLang } from '@/lib/excel-ai/lang'
 
 const SAMPLE_URL = '/samples/utility_billing_sample.xlsx'
 const SAMPLE_NAME = 'utility_billing_sample.xlsx'
 const PREVIEW_ROWS = 100
 
-// ── Language preference (shared across tabs, safe for server rendering) ──
-const LANG_KEY = 'excel-ai-lang'
-const langListeners = new Set<() => void>()
-function readLang(): Lang {
-  try {
-    const v = localStorage.getItem(LANG_KEY)
-    return v === 'ko' || v === 'fr' ? v : 'en'
-  } catch {
-    return 'en'
-  }
-}
-function writeLang(l: Lang) {
-  try { localStorage.setItem(LANG_KEY, l) } catch { /* private mode: keep in memory only */ }
-  langListeners.forEach((f) => f())
-}
-function subscribeLang(f: () => void) {
-  langListeners.add(f)
-  const onStorage = (e: StorageEvent) => { if (e.key === LANG_KEY) f() }
-  window.addEventListener('storage', onStorage)
-  return () => { langListeners.delete(f); window.removeEventListener('storage', onStorage) }
-}
-
-type ErrKey = 'errNotXlsx' | 'errTooBig' | 'errTooManyRows' | 'errEmpty' | 'errNotConfigured' | 'errRateLimited' | 'errFailed' | 'errNoFile' | 'errEmptyRequest'
+type ErrKey = 'errLocked' | 'errNotXlsx' | 'errTooBig' | 'errTooManyRows' | 'errEmpty' | 'errNotConfigured' | 'errRateLimited' | 'errFailed' | 'errNoFile' | 'errEmptyRequest'
 type Request = { id: number; text: string; steps: Op[]; explanation: string; unsupported: string }
 type Message = { role: 'user' | 'assistant'; content: string }
 
 function apiErrorKey(code: unknown): ErrKey {
   if (code === 'not_configured') return 'errNotConfigured'
   if (code === 'rate_limited') return 'errRateLimited'
+  if (code === 'locked') return 'errLocked'
   return 'errFailed'
 }
 
@@ -62,7 +42,7 @@ const STATUS_COL = /^(status|flag|check)$/i
 const CHANGE_OPS: Op['op'][] = ['trim', 'change_case', 'standardize_id', 'replace_values', 'fill_missing']
 
 export default function ExcelAiClient() {
-  const lang = useSyncExternalStore(subscribeLang, readLang, () => 'en' as Lang)
+  const lang = useSyncExternalStore(subscribeLang, readLang, serverLang)
   const d: Dict = DICTS[lang]
 
   const [wb, setWb] = useState<Workbook | null>(null)
