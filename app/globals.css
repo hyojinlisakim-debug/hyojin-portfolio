@@ -1071,3 +1071,5 @@ h1.hx-title span { color: var(--accent); }
   .home-v2 .home-section-head h2 { font-size: clamp(2.1rem, 9vw, 2.8rem); }
 }
 .home-v2 .edu-grid { max-width: 1280px; }
+/* With the research section hidden, education and contact would both be sand. */
+.home-v2 #contact { background: var(--linen); }

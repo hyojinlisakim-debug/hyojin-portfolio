@@ -4,6 +4,9 @@ import FadeIn from "./fade-in";
 import Magnetic from "@/components/Magnetic";
 import CountUp from "@/components/CountUp";
 
+// Hidden during the job search; set to true to show the graduate research section again.
+const SHOW_RESEARCH = false;
+
 export default function Home() {
   return (
     <div className="home-v2">
@@ -291,42 +294,46 @@ export default function Home() {
         </div>
       </section>
 
-      {/* RESEARCH INTERESTS */}
-      <section id="research">
-        <div className="home-section-head fade-in">
-          <div className="eyebrow">Also Exploring</div>
-          <h2>Graduate research interests</h2>
-          <p className="section-desc">
-            Currently preparing applications for a thesis-based Master&apos;s in AI/Deep Learning — building on the same efficiency-first mindset behind the automation work above.
-          </p>
-        </div>
-        <div className="cell-grid cols-3 fade-in">
-          <div className="cell">
-            <svg className="cell-icon" viewBox="0 0 74 74"><circle className="frame" cx="37" cy="37" r="30"/>
-              <path className="stroke" d="M22 37 L32 30 M32 30 L42 42 M42 42 L54 33" opacity="0.7"/>
-              <circle className="dot-rose" cx="22" cy="37" r="2"/><circle className="dot-ink" cx="32" cy="30" r="1.6"/>
-              <circle className="dot-moss" cx="42" cy="42" r="1.6"/><circle className="dot-ink" cx="54" cy="33" r="1.6"/></svg>
-            <div className="cell-title">Efficient &amp; Sparse Deep Learning</div>
-            <p className="cell-desc">Interested in model compression and sparse neural network training — reducing the computational cost of large-scale AI systems without sacrificing performance.</p>
+      {SHOW_RESEARCH && (
+        <>
+        {/* RESEARCH INTERESTS */}
+        <section id="research">
+          <div className="home-section-head fade-in">
+            <div className="eyebrow">Also Exploring</div>
+            <h2>Graduate research interests</h2>
+            <p className="section-desc">
+              Currently preparing applications for a thesis-based Master&apos;s in AI/Deep Learning — building on the same efficiency-first mindset behind the automation work above.
+            </p>
           </div>
-          <div className="cell">
-            <svg className="cell-icon" viewBox="0 0 74 74"><circle className="frame" cx="37" cy="37" r="30"/>
-              <path className="stroke" d="M22 44 h12 v-12 h12 v-12" opacity="0.7"/>
-              <circle className="dot-rose" cx="46" cy="20" r="2"/></svg>
-            <div className="cell-title">From Automation to AI Efficiency</div>
-            <p className="cell-desc">5+ years spent optimizing enterprise systems to do more with less compute and less manual overhead — now bringing that mindset to neural network training and inference.</p>
+          <div className="cell-grid cols-3 fade-in">
+            <div className="cell">
+              <svg className="cell-icon" viewBox="0 0 74 74"><circle className="frame" cx="37" cy="37" r="30"/>
+                <path className="stroke" d="M22 37 L32 30 M32 30 L42 42 M42 42 L54 33" opacity="0.7"/>
+                <circle className="dot-rose" cx="22" cy="37" r="2"/><circle className="dot-ink" cx="32" cy="30" r="1.6"/>
+                <circle className="dot-moss" cx="42" cy="42" r="1.6"/><circle className="dot-ink" cx="54" cy="33" r="1.6"/></svg>
+              <div className="cell-title">Efficient &amp; Sparse Deep Learning</div>
+              <p className="cell-desc">Interested in model compression and sparse neural network training — reducing the computational cost of large-scale AI systems without sacrificing performance.</p>
+            </div>
+            <div className="cell">
+              <svg className="cell-icon" viewBox="0 0 74 74"><circle className="frame" cx="37" cy="37" r="30"/>
+                <path className="stroke" d="M22 44 h12 v-12 h12 v-12" opacity="0.7"/>
+                <circle className="dot-rose" cx="46" cy="20" r="2"/></svg>
+              <div className="cell-title">From Automation to AI Efficiency</div>
+              <p className="cell-desc">5+ years spent optimizing enterprise systems to do more with less compute and less manual overhead — now bringing that mindset to neural network training and inference.</p>
+            </div>
+            <div className="cell">
+              <svg className="cell-icon" viewBox="0 0 74 74"><circle className="frame" cx="37" cy="37" r="30"/>
+                <path className="stroke" d="M25 27 h24 M25 34 h24 M25 41 h16 M25 48 h20" opacity="0.65"/></svg>
+              <div className="cell-title">Academic CV Available</div>
+              <p className="cell-desc">A research-focused CV, including relevant technical experience and target research direction, is available on request.</p>
+            </div>
           </div>
-          <div className="cell">
-            <svg className="cell-icon" viewBox="0 0 74 74"><circle className="frame" cx="37" cy="37" r="30"/>
-              <path className="stroke" d="M25 27 h24 M25 34 h24 M25 41 h16 M25 48 h20" opacity="0.65"/></svg>
-            <div className="cell-title">Academic CV Available</div>
-            <p className="cell-desc">A research-focused CV, including relevant technical experience and target research direction, is available on request.</p>
+          <div className="research-cta-wrap fade-in">
+            <a className="research-cta" href="mailto:hyojinlisa.kim@gmail.com?subject=Research%20background%20inquiry">Reach out about research collaboration →</a>
           </div>
-        </div>
-        <div className="research-cta-wrap fade-in">
-          <a className="research-cta" href="mailto:hyojinlisa.kim@gmail.com?subject=Research%20background%20inquiry">Reach out about research collaboration →</a>
-        </div>
-      </section>
+        </section>
+        </>
+      )}
 
       {/* CONTACT */}
       <section id="contact">
