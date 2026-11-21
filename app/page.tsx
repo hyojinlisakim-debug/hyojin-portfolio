@@ -53,25 +53,9 @@ export default function Home() {
         </div>
       </section>
 
-      {/* MARQUEE */}
-      <div className="marquee" aria-hidden="true">
-        <div className="marquee-track">
-          {Array.from({ length: 2 }).map((_, i) => (
-            <span key={i} style={{ display: "contents" }}>
-              <span>AVAILABLE FOR HIRE</span>
-              <span>SOFTWARE ENGINEER</span>
-              <span>SHOPIFY DEVELOPMENT</span>
-              <span>PYTHON AUTOMATION</span>
-              <span>AWS INFRASTRUCTURE</span>
-              <span>BASED IN CALGARY</span>
-            </span>
-          ))}
-        </div>
-      </div>
-
       {/* SKILLS */}
       <section id="skills">
-        <div className="home-section-head fade-in" style={{paddingTop: '5.5rem'}}>
+        <div className="home-section-head fade-in">
           <div className="eyebrow">Capabilities</div>
           <h2>What I work with</h2>
           <p className="section-desc">A full range from network infrastructure to front-end development.</p>
@@ -186,7 +170,7 @@ export default function Home() {
 
       {/* PROJECTS */}
       <section id="projects">
-        <div className="home-section-head fade-in" style={{paddingTop: '5.5rem'}}>
+        <div className="home-section-head fade-in">
           <div className="eyebrow">Selected Work</div>
           <h2>What I&apos;ve built</h2>
           <p className="section-desc">Key projects that demonstrate impact across software, infrastructure, and commerce.</p>

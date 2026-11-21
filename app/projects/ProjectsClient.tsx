@@ -312,7 +312,7 @@ export default function ProjectsClient() {
                 )}
 
                 {!isMedia && p.icon && (
-                  <div className="project-icon-tile" style={{ aspectRatio: '4 / 3' }}>
+                  <div className="project-icon-tile" style={{ aspectRatio: '16 / 7' }}>
                     <ProjectIcon id={p.icon} />
                   </div>
                 )}

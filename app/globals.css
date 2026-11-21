@@ -1045,3 +1045,29 @@ h1.hx-title span { color: var(--accent); }
   .hx-mini-row { grid-template-columns: 1fr 0.7fr 1fr 0.8fr; }
   .hx-mini-row > :nth-child(4) { display: none; }
 }
+
+/* ══════════════════════════════════════════════════════════════
+   LAYOUT V3 — calmer section rhythm and headings (home)
+   ══════════════════════════════════════════════════════════════ */
+.home-v2 #skills, .home-v2 #experience, .home-v2 #projects,
+.home-v2 #education, .home-v2 #research, .home-v2 #contact { padding: 96px 5vw; }
+.home-v2 #research .home-section-head { padding-top: 0; }
+.home-v2 .research-cta-wrap { padding: 2.5rem 0 0; }
+.home-v2 .home-section-head {
+  display: block; max-width: 1280px; margin: 0 auto 3rem; text-align: left;
+}
+.home-v2 .home-section-head .eyebrow { margin: 0 0 0.75rem; color: var(--accent); letter-spacing: 0.1em; font-weight: 500; }
+.home-v2 .home-section-head h2 {
+  font-size: clamp(2.3rem, 4.2vw, 3.5rem); line-height: 1.05; letter-spacing: -0.03em;
+  font-weight: 600; margin-bottom: 0.9rem; max-width: 18ch;
+}
+.home-v2 .home-section-head .section-desc { max-width: 560px; font-size: 16.5px; color: var(--ink-dim); }
+.home-v2 .exp-item { padding: 2.5rem 0; }
+.home-v2 .exp-company { font-weight: 600; }
+.home-v2 .contact-box h2 { font-size: clamp(2.6rem, 5vw, 4.2rem); letter-spacing: -0.03em; line-height: 1.05; font-weight: 600; }
+@media (max-width: 640px) {
+  .home-v2 #skills, .home-v2 #experience, .home-v2 #projects,
+  .home-v2 #education, .home-v2 #research, .home-v2 #contact { padding: 72px 1.25rem; }
+  .home-v2 .home-section-head h2 { font-size: clamp(2.1rem, 9vw, 2.8rem); }
+}
+.home-v2 .edu-grid { max-width: 1280px; }
