@@ -1,8 +1,6 @@
-import type { CSSProperties } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import FadeIn from "./fade-in";
-import NeuronHero from "@/components/NeuronHero";
 import Magnetic from "@/components/Magnetic";
 import CountUp from "@/components/CountUp";
 
@@ -11,47 +9,48 @@ export default function Home() {
     <div className="home-v2">
       <FadeIn />
       {/* HERO */}
-      <section id="hero">
-        <div className="hero-inner">
-          <div className="hero-copy">
-            <div className="hero-kicker"><span>01</span> Engineer · Designer · Systems thinker</div>
-            <div className="eyebrow">Available for opportunities in Canada</div>
-            <h1 className="reveal-heading">
-              <span className="reveal-word" style={{ "--reveal-delay": "0.05s" } as CSSProperties}>Hyojin</span>{" "}
-              <span className="reveal-word" style={{ "--reveal-delay": "0.2s" } as CSSProperties}><em>Kim</em></span>
-            </h1>
-            <p className="hero-desc">
-              Software Engineer &amp; IT Specialist with 5+ years bridging infrastructure, automation, and web development. From network uptime at mission-critical ports to Shopify storefronts — I build things that work.
+      <section id="hero" className="hx">
+        <div className="hx-inner">
+          <div className="hx-copy">
+            <p className="hx-status"><span className="hx-dot" aria-hidden="true" />Open to roles in Calgary · Data, analytics &amp; IT systems</p>
+            <h1 className="hx-title">Hyojin <span>Kim</span></h1>
+            <p className="hx-lead">I turn messy operational data into systems people can trust.</p>
+            <p className="hx-desc">
+              Software and IT specialist with 5+ years across network infrastructure, enterprise asset management, and web development — automating reporting, connecting systems, and keeping critical services running.
             </p>
-            <div className="hero-disciplines" aria-label="Core disciplines">
-              <span>UI / UX</span><span>Backend</span><span>Network</span><span>Cloud</span><span>AI</span>
-            </div>
-            <div className="hero-ctas">
+            <div className="hx-ctas">
               <Magnetic><Link className="btn btn-primary" href="/contact">Get in touch</Link></Magnetic>
               <Magnetic><a className="btn btn-outline" href="/Hyojin_Kim_Resume.pdf" target="_blank" rel="noreferrer">View résumé</a></Magnetic>
-              <a className="hero-text-link" href="https://github.com/hyojinlisakim-debug" target="_blank" rel="noreferrer">GitHub ↗</a>
+              <a className="hx-link" href="https://github.com/hyojinlisakim-debug" target="_blank" rel="noreferrer">GitHub ↗</a>
             </div>
-            <div className="hero-stats">
-              <div><span className="stat-num"><CountUp end={5} suffix="+" /></span><span className="stat-label">Years experience</span></div>
-              <div><span className="stat-num"><CountUp end={50} suffix="%" /></span><span className="stat-label">Reporting time saved</span></div>
-              <div><span className="stat-num"><CountUp end={99.9} suffix="%" decimals={1} /></span><span className="stat-label">Network uptime</span></div>
-              <div><span className="stat-num"><CountUp end={80} suffix="+" /></span><span className="stat-label">Issues resolved</span></div>
-            </div>
+            <ul className="hx-tags" aria-label="Core skills">
+              <li>Python &amp; SQL</li><li>Excel &amp; reconciliation</li><li>EAM / SAP integration</li><li>Network &amp; cloud</li><li>Next.js</li>
+            </ul>
           </div>
-          <div className="hero-visual">
-            <div className="hero-stage">
-              <div className="hero-orbit orbit-one" aria-hidden="true" />
-              <div className="hero-orbit orbit-two" aria-hidden="true" />
-              <div className="hero-art-image" aria-hidden="true">
-                <Image src="/images/generated/neural-hero-v2.png" alt="" fill priority sizes="(max-width: 860px) 90vw, 48vw" />
+
+          <aside className="hx-side" aria-label="Highlights">
+            <Link href="/lab/excel-ai" className="hx-feature">
+              <div className="hx-feature-top">
+                <span className="hx-chip">New · Live demo</span>
+                <span className="hx-arrow" aria-hidden="true">→</span>
               </div>
-              <div className="hero-neuron-backdrop"><NeuronHero /></div>
-              <div className="hero-visual-label label-top">Interactive neural field</div>
-              <div className="hero-visual-label label-bottom"><span>Live</span> Move your cursor</div>
+              <div className="hx-feature-title">AI Excel data processor</div>
+              <p className="hx-feature-desc">Describe a task in plain language. AI plans the steps, the browser computes them, and every step comes with its Excel formula.</p>
+              <div className="hx-mini" aria-hidden="true">
+                <div className="hx-mini-row"><span>Month</span><span>Class</span><span>Billed</span><span>Ledger</span><span>Status</span></div>
+                <div className="hx-mini-row"><span>2026-04</span><span>RES</span><span>$13,677</span><span>$13,677</span><span className="hx-st ok">OK</span></div>
+                <div className="hx-mini-row bad"><span>2026-05</span><span>FARM</span><span>$12,657</span><span>$16,967</span><span className="hx-st">Check</span></div>
+                <div className="hx-mini-row"><span>2026-05</span><span>GS</span><span>$35,585</span><span>$35,585</span><span className="hx-st ok">OK</span></div>
+              </div>
+            </Link>
+            <div className="hx-stats">
+              <div><span className="hx-num"><CountUp end={5} suffix="+" /></span><span className="hx-label">Years in IT and software</span></div>
+              <div><span className="hx-num"><CountUp end={50} suffix="%" /></span><span className="hx-label">Reporting time saved</span></div>
+              <div><span className="hx-num"><CountUp end={99.9} suffix="%" decimals={1} /></span><span className="hx-label">Network uptime, 9 ports</span></div>
+              <div><span className="hx-num"><CountUp end={80} suffix="+" /></span><span className="hx-label">Go-live issues resolved</span></div>
             </div>
-          </div>
+          </aside>
         </div>
-        <div className="scroll-cue">Scroll</div>
       </section>
 
       {/* MARQUEE */}

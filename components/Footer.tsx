@@ -10,7 +10,7 @@ export default function Footer() {
         &copy; {new Date().getFullYear()} Hyojin Kim. Built for opportunities.
       </span>
       <a href="#" style={{
-        fontFamily: 'var(--mono)', fontSize: '11px', color: 'var(--muted)',
+        fontFamily: 'var(--mono)', fontSize: '12px', color: 'var(--muted)',
         textDecoration: 'none', letterSpacing: '0.06em',
       }}>
         ↑ Back to top

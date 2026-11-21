@@ -97,7 +97,7 @@ export default function ChatWidget() {
           fontFamily: 'var(--serif)', fontSize: '15px', fontWeight: 500, color: 'var(--text)',
         }}>
           Ask Hyojin
-          <div style={{ fontFamily: 'var(--mono)', fontSize: '10px', color: 'var(--muted)', marginTop: '2px', letterSpacing: '0.04em' }}>
+          <div style={{ fontFamily: 'var(--mono)', fontSize: '11.5px', color: 'var(--muted)', marginTop: '2px', letterSpacing: '0.04em' }}>
             AI guide · based on her resume &amp; projects
           </div>
         </div>
@@ -122,7 +122,7 @@ export default function ChatWidget() {
           ))}
           {loading && (
             <div style={{
-              alignSelf: 'flex-start', fontFamily: 'var(--mono)', fontSize: '11px',
+              alignSelf: 'flex-start', fontFamily: 'var(--mono)', fontSize: '12px',
               color: 'var(--muted)', letterSpacing: '0.04em', padding: '4px 2px',
             }}>
               thinking…

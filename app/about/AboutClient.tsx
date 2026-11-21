@@ -68,7 +68,7 @@ export default function AboutClient() {
             <span className="reveal-word" style={{ '--reveal-delay': '0.35s' } as CSSProperties}>to</span>{' '}
             <span className="reveal-word" style={{ '--reveal-delay': '0.45s' } as CSSProperties}><em>software.</em></span>
           </h1>
-          <p style={{ color: 'var(--ink-dim)', fontSize: '16px', lineHeight: 1.85, fontWeight: 300, margin: '1.5rem auto 2.5rem', maxWidth: '560px' }}>
+          <p style={{ color: 'var(--ink-dim)', fontSize: '16px', lineHeight: 1.85, fontWeight: 400, margin: '1.5rem auto 2.5rem', maxWidth: '560px' }}>
             5+ years bridging IT infrastructure, automation, and web development — from keeping 40+ network devices at 99.9% uptime for mission-critical maritime infrastructure, to building the Shopify storefronts you can see in my projects today.
           </p>
           <div className="hero-ctas" style={{ justifyContent: 'center' }}>
@@ -112,7 +112,7 @@ export default function AboutClient() {
                 </span>
                 {exp.badge && (
                   <span style={{
-                    fontFamily: 'var(--mono)', fontSize: '10px', letterSpacing: '0.08em',
+                    fontFamily: 'var(--mono)', fontSize: '11.5px', letterSpacing: '0.08em',
                     padding: '3px 10px', borderRadius: '100px',
                     color: 'var(--teal)', background: 'rgba(46,207,168,0.1)',
                     border: '1px solid rgba(46,207,168,0.25)', alignSelf: 'center',
@@ -123,7 +123,7 @@ export default function AboutClient() {
               <div style={{ color: 'var(--accent2)', fontSize: '14px', fontWeight: 500, marginBottom: '0.25rem' }}>
                 {exp.role}
               </div>
-              <div style={{ fontFamily: 'var(--mono)', fontSize: '11px', color: 'var(--muted)', marginBottom: '1.25rem', letterSpacing: '0.05em' }}>
+              <div style={{ fontFamily: 'var(--mono)', fontSize: '12px', color: 'var(--muted)', marginBottom: '1.25rem', letterSpacing: '0.05em' }}>
                 {exp.period}
               </div>
 
@@ -162,7 +162,7 @@ export default function AboutClient() {
         }}>
           {/* Education */}
           <div>
-            <div style={{ fontFamily: 'var(--mono)', fontSize: '11px', letterSpacing: '0.12em', color: 'var(--muted)', textTransform: 'uppercase', marginBottom: '1rem' }}>
+            <div style={{ fontFamily: 'var(--mono)', fontSize: '12px', letterSpacing: '0.12em', color: 'var(--muted)', textTransform: 'uppercase', marginBottom: '1rem' }}>
               Education
             </div>
             {[
@@ -176,14 +176,14 @@ export default function AboutClient() {
               }}>
                 <div style={{ fontSize: '14px', fontWeight: 600, marginBottom: '0.25rem' }}>{e.degree}</div>
                 <div style={{ color: 'var(--accent2)', fontSize: '13px', marginBottom: '0.25rem' }}>{e.school}</div>
-                <div style={{ fontFamily: 'var(--mono)', fontSize: '11px', color: 'var(--muted)', letterSpacing: '0.04em' }}>{e.meta}</div>
+                <div style={{ fontFamily: 'var(--mono)', fontSize: '12px', color: 'var(--muted)', letterSpacing: '0.04em' }}>{e.meta}</div>
               </div>
             ))}
           </div>
 
           {/* Certifications */}
           <div>
-            <div style={{ fontFamily: 'var(--mono)', fontSize: '11px', letterSpacing: '0.12em', color: 'var(--muted)', textTransform: 'uppercase', marginBottom: '1rem' }}>
+            <div style={{ fontFamily: 'var(--mono)', fontSize: '12px', letterSpacing: '0.12em', color: 'var(--muted)', textTransform: 'uppercase', marginBottom: '1rem' }}>
               Certifications
             </div>
             {[
@@ -199,9 +199,9 @@ export default function AboutClient() {
               }}>
                 <div>
                   <div style={{ fontSize: '13px', fontWeight: 500 }}>{c.name}</div>
-                  <div style={{ fontSize: '11px', color: 'var(--muted)', marginTop: '2px' }}>{c.issuer}</div>
+                  <div style={{ fontSize: '12px', color: 'var(--muted)', marginTop: '2px' }}>{c.issuer}</div>
                 </div>
-                <span style={{ fontFamily: 'var(--mono)', fontSize: '11px', color: 'var(--teal)', whiteSpace: 'nowrap', marginLeft: '1rem' }}>
+                <span style={{ fontFamily: 'var(--mono)', fontSize: '12px', color: 'var(--teal)', whiteSpace: 'nowrap', marginLeft: '1rem' }}>
                   {c.year}
                 </span>
               </div>

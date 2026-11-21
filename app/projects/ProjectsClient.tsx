@@ -236,7 +236,7 @@ export default function ProjectsClient() {
               key={f.key}
               onClick={() => setFilter(f.key)}
               style={{
-                fontFamily: 'var(--mono)', fontSize: '11px', letterSpacing: '0.08em', textTransform: 'uppercase',
+                fontFamily: 'var(--mono)', fontSize: '12px', letterSpacing: '0.08em', textTransform: 'uppercase',
                 padding: '7px 16px', borderRadius: '100px', cursor: 'pointer',
                 border: `1px solid ${filter === f.key ? 'var(--accent)' : 'var(--border2)'}`,
                 background: filter === f.key ? 'rgba(var(--accent-rgb),0.1)' : 'transparent',
@@ -303,7 +303,7 @@ export default function ProjectsClient() {
                     )}
                     <span style={{
                       position: 'absolute', bottom: '10px', right: '10px',
-                      fontFamily: 'var(--mono)', fontSize: '11px', color: '#fff',
+                      fontFamily: 'var(--mono)', fontSize: '12px', color: '#fff',
                       background: 'rgba(0,0,0,0.55)', padding: '3px 8px', borderRadius: '100px',
                     }}>
                       {p.media!.length} items
@@ -319,11 +319,11 @@ export default function ProjectsClient() {
 
                 <div style={{ padding: '1.75rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1rem' }}>
-                    <span style={{ fontFamily: 'var(--mono)', fontSize: '11px', color: 'var(--accent)', letterSpacing: '0.08em' }}>{p.num}</span>
+                    <span style={{ fontFamily: 'var(--mono)', fontSize: '12px', color: 'var(--accent)', letterSpacing: '0.08em' }}>{p.num}</span>
                     <div style={{ display: 'flex', gap: '5px' }}>
                       {p.categories.map(c => (
                         <span key={c} style={{
-                          fontFamily: 'var(--mono)', fontSize: '9px', letterSpacing: '0.06em', textTransform: 'uppercase',
+                          fontFamily: 'var(--mono)', fontSize: '11px', letterSpacing: '0.06em', textTransform: 'uppercase',
                           padding: '2px 7px', borderRadius: '100px',
                           background: c === 'ai' ? 'rgba(var(--accent-rgb),0.1)' : 'color-mix(in srgb, var(--teal) 14%, transparent)',
                           color: c === 'ai' ? 'var(--accent)' : 'var(--teal)',
@@ -333,7 +333,7 @@ export default function ProjectsClient() {
                   </div>
                   <div style={{ fontSize: '16px', fontWeight: 600, marginBottom: '0.5rem' }}>{p.title}</div>
                   <p style={{ fontSize: '13px', color: 'var(--muted)', lineHeight: 1.7, marginBottom: '1.25rem' }}>{p.desc}</p>
-                  <div style={{ fontFamily: 'var(--mono)', fontSize: '11px', color: 'var(--teal)', display: 'flex', alignItems: 'center', gap: '6px', letterSpacing: '0.04em' }}>
+                  <div style={{ fontFamily: 'var(--mono)', fontSize: '12px', color: 'var(--teal)', display: 'flex', alignItems: 'center', gap: '6px', letterSpacing: '0.04em' }}>
                     {p.meta} <span style={{ color: 'var(--muted)' }}>·</span> {p.stack}
                   </div>
                   {p.href && (
