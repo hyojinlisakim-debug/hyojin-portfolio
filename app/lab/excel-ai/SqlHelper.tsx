@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react'
 import type { Cell, Table } from '@/lib/excel-ai/types'
 import type { Dict } from '@/lib/excel-ai/i18n'
 import { quoteIdent } from '@/lib/excel-ai/sqlite'
+import { SqlCode } from './CodeEditor'
 
 type TableInfo = { name: string; columns: string[]; table: Table }
 type CondOp = 'eq' | 'ne' | 'gt' | 'gte' | 'lt' | 'lte' | 'contains' | 'starts' | 'blank' | 'notblank'
@@ -32,7 +33,7 @@ function condSql(c: Cond, numeric: boolean): string {
 }
 
 /** Point-and-click query builder and SQL basics, for people who do not write SQL. */
-export default function SqlHelper({ mode, tables, d, onUse }: { mode: 'build' | 'learn'; tables: TableInfo[]; d: Dict; onUse: (sql: string) => void }) {
+export default function SqlHelper({ mode, tables, tableNames, d, onUse }: { mode: 'build' | 'learn'; tables: TableInfo[]; tableNames: readonly string[]; d: Dict; onUse: (sql: string) => void }) {
   const [tableName, setTableName] = useState(tables[0]?.name ?? 'result')
   const info = tables.find((t) => t.name === tableName) ?? tables[0]
   const [cols, setCols] = useState<string[]>([])
@@ -107,7 +108,7 @@ export default function SqlHelper({ mode, tables, d, onUse }: { mode: 'build' | 
               <b>{i + 1}. {l.title}</b>
               <p>{l.text}</p>
             </div>
-            <pre>{l.sql}</pre>
+            <SqlCode code={l.sql} tables={tableNames} />
             <button type="button" className="xl-btn" onClick={() => onUse(l.sql)}>{d.learnTry}</button>
           </div>
         ))}
@@ -216,6 +217,8 @@ export default function SqlHelper({ mode, tables, d, onUse }: { mode: 'build' | 
         </label>
       </div>
 
+      <p className="xl-meta" style={{ marginBottom: 4 }}>{d.bPreview}</p>
+      <SqlCode code={build()} tables={tableNames} className="xl-sqlcode-preview" />
       <div className="xl-row">
         <button type="button" className="xl-btn primary" onClick={() => onUse(build())}>{d.bBuild}</button>
         <span className="xl-meta" style={{ margin: 0 }}>{d.bNote}</span>

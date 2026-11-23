@@ -7,6 +7,7 @@ import { writeXlsx } from '@/lib/excel-ai/xlsx'
 import { type QueryResult, type SqlDb, buildDatabase, loadSqlJs, planTables, quoteIdent, runSql } from '@/lib/excel-ai/sqlite'
 import { SQL_EXAMPLES } from '@/lib/excel-ai/sql-examples'
 import SqlHelper from './SqlHelper'
+import CodeEditor from './CodeEditor'
 
 const PREVIEW = 200
 const isPlainIdent = (s: string) => /^[A-Za-z_][A-Za-z0-9_]*$/.test(s)
@@ -37,6 +38,7 @@ export default function SqlPanel({ wb, result, lang, d, sample, formatCell }: Pr
   const cache = useRef<{ wb: Workbook; result: Table; db: SqlDb } | null>(null)
 
   const tables = useMemo(() => planTables(wb.sheets, result), [wb, result])
+  const tableNames = useMemo(() => tables.map((t) => t.name), [tables])
   const examples = sample ? SQL_EXAMPLES[sample] : []
 
   function insert(text: string) {
@@ -163,6 +165,7 @@ export default function SqlPanel({ wb, result, lang, d, sample, formatCell }: Pr
           key={`${mode}-${tables.map((t) => t.name).join('|')}`}
           mode={mode}
           tables={tables}
+          tableNames={tableNames}
           d={d}
           onUse={(q) => { setSql(q); setAiNote(''); setMode('write'); void run(q) }}
         />
@@ -187,17 +190,15 @@ export default function SqlPanel({ wb, result, lang, d, sample, formatCell }: Pr
           ))}
         </aside>
         <div style={{ minWidth: 0 }}>
-          <textarea
-            ref={editor}
-            className="xl-textarea xl-code"
+          <CodeEditor
             value={sql}
-            spellCheck={false}
-            aria-label="SQL"
-            onChange={(e) => setSql(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); void run() }
-              if (e.key === 'Tab') { e.preventDefault(); insert('  ') }
-            }}
+            onChange={setSql}
+            onRun={() => void run()}
+            tables={tableNames}
+            textareaRef={editor}
+            label="SQL"
+            runHint={d.sqlRunHint}
+            lineCountLabel={d.sqlLines}
           />
           <div className="xl-row">
             <button type="button" className="xl-btn primary" onClick={() => void run()} aria-busy={running}>

@@ -1,4 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Public+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@1,6..72,400..500&display=swap');
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css');
+@import url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -19,10 +20,10 @@
   --moss: #136a63;
   --line-on-sand: rgba(15,23,32,0.16);
   --line-on-light: rgba(15,23,32,0.11);
-  --serif: 'Bricolage Grotesque', 'Public Sans', sans-serif;
-  --sans: 'Public Sans', 'Helvetica Neue', sans-serif;
-  --mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  --accent-serif: 'Newsreader', 'Iowan Old Style', serif;
+  --serif: 'Inter', 'Pretendard Variable', Pretendard, system-ui, -apple-system, 'Segoe UI', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+  --sans: 'Inter', 'Pretendard Variable', Pretendard, system-ui, -apple-system, 'Segoe UI', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, 'D2Coding', monospace;
+  --accent-serif: var(--sans);
   --accent-rgb: 154,91,18;
   --signal-teal: #136a63;
   --signal-violet: #5b4f99;
@@ -1121,7 +1122,7 @@ h1.hx-title span { color: var(--accent); }
 .sap-grid tr.subtotal td { background: #fff4cc !important; font-weight: 700; border-top: 1px solid #d9c27a; }
 .sap-grid tr.total td { background: #ffe08a !important; font-weight: 700; border-top: 2px solid #c9a227; }
 .sap-grid tr.sap-gap td { background: #fff !important; color: #6a7d90; font-style: italic; text-align: center; }
-.bi-report { background: #f3f2f1; border-radius: 8px; padding: 14px; color: #252423; font-family: 'Segoe UI', 'Public Sans', Arial, sans-serif; }
+.bi-report { background: #f3f2f1; border-radius: 8px; padding: 14px; color: #252423; font-family: 'Segoe UI', 'Inter', Arial, sans-serif; }
 .bi-head { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; align-items: baseline; margin-bottom: 12px; }
 .bi-head b { font-size: 17px; font-weight: 600; }
 .bi-head span { font-size: 12px; color: #605e5c; }
@@ -1155,3 +1156,79 @@ h1.hx-title span { color: var(--accent); }
 }
 .xl-grid.wide { grid-template-columns: minmax(0, 1fr); }
 .xl-grid.wide > :last-child { order: -1; }
+
+/* ===== TYPE V4: Inter + Pretendard (Korean) + JetBrains Mono ===== */
+html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeLegibility; }
+body { font-optical-sizing: auto; letter-spacing: -0.005em; }
+:lang(ko) body, body:lang(ko) { word-break: keep-all; }
+h1 { font-weight: 650; letter-spacing: -0.035em; line-height: 1.02; }
+h1 em { font-style: normal; font-weight: 650; }
+.home-v2 .hero-copy h1 em { font-style: normal; font-weight: 650; }
+h2 { font-weight: 620; letter-spacing: -0.028em; }
+.stat-num, .hx-num { font-weight: 650; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+.cell-title, .exp-company, .project-title, .edu-degree, .xl-how b { font-weight: 600; letter-spacing: -0.018em; }
+.hx-title { letter-spacing: -0.04em; }
+.hx-lead { font-weight: 500; letter-spacing: -0.015em; }
+.hx-feature-title { letter-spacing: -0.02em; }
+.xl-table, .xl-table td.num, .sap-report, .bi-report { font-variant-numeric: tabular-nums; }
+
+/* ===== SQL code editor ===== */
+.xl-editor {
+  --ed-bg: #1e1f22; --ed-bar: #2b2d31; --ed-gutter: #6c7086; --ed-text: #d4d4d4; --ed-line: #34363c;
+  border: 1px solid #3a3c42; border-radius: 10px; overflow: hidden; background: var(--ed-bg);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+}
+.xl-editor:focus-within { border-color: rgba(var(--accent-rgb),0.75); box-shadow: 0 0 0 3px rgba(var(--accent-rgb),0.2); }
+.xl-editor-bar {
+  display: flex; align-items: center; gap: 0.75rem; padding: 7px 12px; background: var(--ed-bar);
+  border-bottom: 1px solid #3a3c42; font-family: var(--sans); font-size: 12px; color: #a9adb8;
+}
+.xl-editor-lang {
+  font-family: var(--mono); font-weight: 600; font-size: 11px; letter-spacing: 0.06em; color: #e6e6e6;
+  background: #3b3e45; padding: 2px 8px; border-radius: 4px;
+}
+.xl-editor-hint { margin-left: auto; }
+.xl-editor-hint kbd {
+  font-family: var(--mono); font-size: 10.5px; color: #e6e6e6; background: #3b3e45; border: 1px solid #4a4d55;
+  border-bottom-width: 2px; border-radius: 4px; padding: 0 5px;
+}
+.xl-editor-body { display: flex; position: relative; height: 240px; resize: vertical; overflow: hidden; min-height: 140px; }
+.xl-editor-gutter {
+  flex: none; width: 3rem; padding: 12px 10px 12px 0; text-align: right; overflow: hidden; user-select: none;
+  font-family: var(--mono); font-size: 13.5px; line-height: 1.65; color: var(--ed-gutter); background: var(--ed-bg);
+  border-right: 1px solid var(--ed-line); font-variant-numeric: tabular-nums;
+}
+.xl-editor-gutter span { display: block; }
+.xl-editor-pad { height: 40px; }
+.xl-editor-main { position: relative; flex: 1; min-width: 0; }
+.xl-editor-layer, .xl-editor-input {
+  position: absolute; inset: 0; margin: 0; padding: 12px 14px; border: 0;
+  font-family: var(--mono); font-size: 13.5px; line-height: 1.65; letter-spacing: 0; tab-size: 2;
+  white-space: pre; overflow: auto; font-variant-ligatures: none; font-feature-settings: normal;
+}
+.xl-editor-layer { color: var(--ed-text); pointer-events: none; overflow: hidden; }
+.xl-editor-input {
+  background: transparent; color: transparent; caret-color: #f5f5f5; resize: none; outline: none;
+  -webkit-text-fill-color: transparent;
+}
+.xl-editor-input::selection { background: rgba(86,156,214,0.38); -webkit-text-fill-color: transparent; }
+
+/* token colours (VS Code Dark+) */
+.tk-kw { color: #569cd6; font-weight: 600; }
+.tk-fn { color: #dcdcaa; }
+.tk-str { color: #ce9178; }
+.tk-id { color: #9cdcfe; }
+.tk-tbl { color: #4ec9b0; }
+.tk-num { color: #b5cea8; }
+.tk-com { color: #6a9955; font-style: italic; }
+.tk-op { color: #d4d4d4; }
+.tk-punc { color: #9da5b4; }
+
+.xl-sqlcode {
+  margin: 0; padding: 0.7rem 0.9rem; border-radius: 8px; background: #1e1f22; color: #d4d4d4; border: 1px solid #3a3c42;
+  font-family: var(--mono); font-size: 12.5px; line-height: 1.6; white-space: pre; overflow-x: auto; tab-size: 2;
+  font-variant-ligatures: none;
+}
+.xl-lesson .xl-sqlcode { white-space: pre-wrap; color: #d4d4d4; font-size: 12.5px; line-height: 1.6; }
+.xl-sqlcode-preview { max-height: 260px; overflow: auto; margin-bottom: 0.25rem; }
+
