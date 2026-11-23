@@ -44,6 +44,13 @@ const STEP_REFERENCE = `Step types (JSON objects):
 - {"op":"select_columns","columns":["A","B"]}
 - {"op":"rename_column","from":"A","to":"B"}
 - {"op":"limit","rows":100}
+- {"op":"convert_number","columns":["Amount"],"style":"auto"|"us"|"eu"} — text to numbers; handles SAP trailing minus "1,234.50-", "(1,234.50)", "1.234,50", currency symbols
+- {"op":"convert_date","columns":["Posting Date"],"order":"auto"|"dmy"|"mdy"|"ymd"} — text to YYYY-MM-DD; handles 31.05.2026, 20260531, 05/31/2026
+- {"op":"remove_report_rows"} — removes subtotal/total lines (cells starting with "*", "Total", "Result") and header rows repeated at page breaks
+- {"op":"pivot","rows":["Rate Category"],"columns":"Month","value":"Amount","func":"sum"|"count"|"average"} — one column per distinct value of "columns" (max 60)
+
+Report exports (SAP ALV lists and similar) often store numbers and dates as text, include subtotal lines and repeated headers. When the user asks to clean such data, use remove_report_rows, convert_number and convert_date before calculating. After convert_date, a month column is LEFT([Date],7).
+The context may include "quality_issues" found by an automatic check; use them when the user asks to clean or validate.
 
 Expressions (filter, add_column) use Excel syntax with columns in square brackets: ([kWh]*[Rate])*(1+[Rider_Pct]).
 Operators: + - * / ^ & = <> < > <= >=. Text in double quotes. Percent as fractions (0.005 = 0.5%).

@@ -3,11 +3,14 @@ import { useMemo, useRef, useState, useSyncExternalStore } from 'react'
 import { type Cell, type ColumnFormat, type Lang, type Table, type Workbook, MAX_FILE_BYTES } from '@/lib/excel-ai/types'
 import { type Op, type StepResult, profile, runPipeline, summarize, toCsv, validateOp } from '@/lib/excel-ai/ops'
 import { FileReadError, readCsv, readXlsx, writeXlsx } from '@/lib/excel-ai/xlsx'
+import { type QualityIssue, checkQuality } from '@/lib/excel-ai/quality'
 import { DICTS, LANGS, LOCALES, type Dict, describeStep, fmt } from '@/lib/excel-ai/i18n'
 import { readLang, serverLang, subscribeLang, writeLang } from '@/lib/excel-ai/lang'
 
 const SAMPLE_URL = '/samples/utility_billing_sample.xlsx'
 const SAMPLE_NAME = 'utility_billing_sample.xlsx'
+const SAP_SAMPLE_URL = '/samples/sap_billing_export_sample.xlsx'
+const SAP_SAMPLE_NAME = 'sap_billing_export_sample.xlsx'
 const PREVIEW_ROWS = 100
 
 type ErrKey = 'errLocked' | 'errNotXlsx' | 'errTooBig' | 'errTooManyRows' | 'errEmpty' | 'errNotConfigured' | 'errRateLimited' | 'errFailed' | 'errNoFile' | 'errEmptyRequest'
@@ -39,7 +42,7 @@ function formatCell(v: Cell, format: ColumnFormat | undefined, lang: Lang): stri
 }
 
 const STATUS_COL = /^(status|flag|check)$/i
-const CHANGE_OPS: Op['op'][] = ['trim', 'change_case', 'standardize_id', 'replace_values', 'fill_missing']
+const CHANGE_OPS: Op['op'][] = ['trim', 'change_case', 'standardize_id', 'replace_values', 'fill_missing', 'convert_number', 'convert_date']
 
 export default function ExcelAiClient() {
   const lang = useSyncExternalStore(subscribeLang, readLang, serverLang)
@@ -59,6 +62,7 @@ export default function ExcelAiClient() {
   const [question, setQuestion] = useState('')
   const [asking, setAsking] = useState(false)
   const [chatError, setChatError] = useState<ErrKey | null>(null)
+  const [quality, setQuality] = useState<{ table: Table; issues: QualityIssue[] } | null>(null)
   const fileInput = useRef<HTMLInputElement>(null)
 
   const allSteps = useMemo(() => requests.flatMap((r) => r.steps), [requests])
@@ -84,6 +88,7 @@ export default function ExcelAiClient() {
     setMessages([])
     setError(null)
     setChatError(null)
+    setQuality(null)
   }
 
   function readErrorKey(e: unknown): ErrKey {
@@ -99,7 +104,7 @@ export default function ExcelAiClient() {
     if (file.size > MAX_FILE_BYTES) { setFileError('errTooBig'); return }
     setLoadingFile(true)
     try {
-      const book = /\.csv$/i.test(file.name)
+      const book = /\.(csv|tsv|txt)$/i.test(file.name)
         ? readCsv(await file.text(), file.name)
         : await readXlsx(await file.arrayBuffer(), file.name)
       applyWorkbook(book)
@@ -110,13 +115,13 @@ export default function ExcelAiClient() {
     }
   }
 
-  async function loadSample() {
+  async function loadSample(url: string, name: string) {
     setFileError(null)
     setLoadingFile(true)
     try {
-      const res = await fetch(SAMPLE_URL)
+      const res = await fetch(url)
       if (!res.ok) throw new Error('sample')
-      applyWorkbook(await readXlsx(await res.arrayBuffer(), SAMPLE_NAME))
+      applyWorkbook(await readXlsx(await res.arrayBuffer(), name))
     } catch (e) {
       setFileError(readErrorKey(e))
     } finally {
@@ -134,6 +139,7 @@ export default function ExcelAiClient() {
       sheets: wb.sheets.slice(0, 10).map((s) => trim(summarize(s, 3))),
       current_table: trim(summarize(pipeline.table, 4)),
       steps_already_applied: allSteps.map((s) => describeStep(s, DICTS.en)),
+      quality_issues: checkQuality(pipeline.table).slice(0, 20),
     }
   }
 
@@ -228,9 +234,17 @@ export default function ExcelAiClient() {
         ])
       })
     })
+    const qualityTable: Table | null = quality && quality.table === pipeline.table ? {
+      name: 'Data_Quality',
+      columns: [d.qualityHead.column, d.qualityHead.check, d.qualityHead.rows, d.qualityHead.example],
+      rows: quality.issues.map((q) => [q.column ?? d.qualityWhole, d.qualityKinds[q.kind], q.count, q.example || null]),
+      formulas: {},
+      formats: {},
+    } : null
     const bytes = writeXlsx([
       { table: { ...pipeline.table, name: 'Result' }, liveFormulas: true },
       { table: stepsTable, wrapColumns: [1, 2, 3] },
+      ...(qualityTable ? [{ table: qualityTable, wrapColumns: [3] }] : []),
       ...wb.sheets.map((t) => ({ table: t })),
     ])
     const blob = new Blob([bytes.buffer as ArrayBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
@@ -253,6 +267,8 @@ export default function ExcelAiClient() {
   }
 
   const table = pipeline?.table
+  const suggestions = wb?.fileName === SAMPLE_NAME ? d.suggest : wb?.fileName === SAP_SAMPLE_NAME ? d.suggestSap : []
+  const qualityShown = quality && table && quality.table === table ? quality.issues : null
   const statusCols = table ? table.columns.map((c, i) => (STATUS_COL.test(c) ? i : -1)).filter((i) => i >= 0) : []
   const startTable = wb?.sheets.find((s) => s.name === startSheet)
 
@@ -301,12 +317,12 @@ export default function ExcelAiClient() {
                 <button type="button" className="xl-link" onClick={() => fileInput.current?.click()}>{d.chooseFile}</button>
                 {' · '}{d.demoNote}
               </p>
-              <button type="button" className="xl-btn primary" onClick={loadSample} aria-busy={loadingFile}>{d.useSample}</button>
-              <a className="xl-btn" href={SAMPLE_URL} download>{d.downloadSample}</a>
+              <button type="button" className="xl-btn primary" onClick={() => void loadSample(SAMPLE_URL, SAMPLE_NAME)} aria-busy={loadingFile}>{d.useSample}</button>
+              <button type="button" className="xl-btn primary" onClick={() => void loadSample(SAP_SAMPLE_URL, SAP_SAMPLE_NAME)} aria-busy={loadingFile}>{d.useSampleSap}</button>
               <input
                 ref={fileInput}
                 type="file"
-                accept=".xlsx,.csv"
+                accept=".xlsx,.csv,.tsv,.txt"
                 hidden
                 onChange={(e) => {
                   const f = e.target.files?.[0]
@@ -319,6 +335,11 @@ export default function ExcelAiClient() {
               {loadingFile && <p className="xl-meta">{d.loading}</p>}
               {fileError && <p className="xl-error">{d[fileError]}</p>}
             </div>
+            <p className="xl-meta" style={{ marginBottom: 0 }}>
+              <a className="xl-link" href={SAMPLE_URL} download>{d.downloadSample}</a>
+              {' · '}
+              <a className="xl-link" href={SAP_SAMPLE_URL} download>{d.downloadSampleSap}</a>
+            </p>
             {wb && (
               <div className="xl-file">
                 <b>{wb.fileName}</b>
@@ -364,17 +385,65 @@ export default function ExcelAiClient() {
               )}
             </div>
             <div aria-live="polite">{error && <p className="xl-error">{d[error]}</p>}</div>
-            {wb?.fileName === SAMPLE_NAME && (
+            {suggestions.length > 0 && (
               <>
                 <p className="xl-meta" style={{ marginBottom: 0 }}>{d.suggestions}</p>
                 <div className="xl-chips">
-                  {d.suggest.map((s) => (
+                  {suggestions.map((s) => (
                     <button key={s} type="button" className="xl-chip" onClick={() => { setInput(s); void run(s) }}>{s}</button>
                   ))}
                 </div>
               </>
             )}
           </div>
+
+          {/* ── Data quality ── */}
+          {wb && table && (
+            <div className="xl-card">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+                <span className="xl-label" style={{ marginBottom: 0 }}>{d.qualityTitle}</span>
+                <div className="xl-row" style={{ marginTop: 0 }}>
+                  <button type="button" className="xl-btn" onClick={() => setQuality({ table, issues: checkQuality(table) })}>{d.qualityRun}</button>
+                  {qualityShown && qualityShown.length > 0 && (
+                    <button type="button" className="xl-btn primary" onClick={() => { setInput(d.qualityFixPrompt); void run(d.qualityFixPrompt) }} aria-busy={planning}>{d.qualityFix}</button>
+                  )}
+                </div>
+              </div>
+              {qualityShown && (
+                <div aria-live="polite">
+                  <p className="xl-meta">
+                    {qualityShown.length === 0
+                      ? fmt(d.qualityNone, { rows: table.rows.length.toLocaleString(LOCALES[lang]) })
+                      : fmt(d.qualitySummary, { n: qualityShown.length, rows: table.rows.length.toLocaleString(LOCALES[lang]) })}
+                  </p>
+                  {qualityShown.length > 0 && (
+                    <div className="xl-table-wrap" style={{ maxHeight: 360 }}>
+                      <table className="xl-table">
+                        <thead>
+                          <tr>
+                            <th scope="col">{d.qualityHead.column}</th>
+                            <th scope="col">{d.qualityHead.check}</th>
+                            <th scope="col">{d.qualityHead.rows}</th>
+                            <th scope="col">{d.qualityHead.example}</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {qualityShown.map((q, i) => (
+                            <tr key={i}>
+                              <td>{q.column ?? d.qualityWhole}</td>
+                              <td className={q.kind === 'negatives' || q.kind === 'outliers' ? undefined : 'bad'}>{d.qualityKinds[q.kind]}</td>
+                              <td className="num">{q.count.toLocaleString(LOCALES[lang])}</td>
+                              <td style={{ fontFamily: 'var(--mono)', fontSize: 12 }}>{q.example}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* ── Steps + Result ── */}
           {wb && pipeline && table && (

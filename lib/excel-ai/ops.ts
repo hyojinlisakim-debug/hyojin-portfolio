@@ -27,11 +27,15 @@ export type Op =
   | { op: 'select_columns'; columns: string[] }
   | { op: 'rename_column'; from: string; to: string }
   | { op: 'limit'; rows: number }
+  | { op: 'convert_number'; columns: string[]; style?: 'auto' | 'us' | 'eu' }
+  | { op: 'convert_date'; columns: string[]; order?: 'auto' | 'dmy' | 'mdy' | 'ymd' }
+  | { op: 'remove_report_rows' }
+  | { op: 'pivot'; rows: string[]; columns: string; value: string; func?: 'sum' | 'count' | 'average' }
 
 export const OP_NAMES: Op['op'][] = [
   'use_sheet', 'trim', 'change_case', 'standardize_id', 'replace_values', 'fill_missing',
   'remove_duplicates', 'filter', 'sort', 'add_column', 'lookup', 'group_by', 'reconcile',
-  'select_columns', 'rename_column', 'limit',
+  'select_columns', 'rename_column', 'limit', 'convert_number', 'convert_date', 'remove_report_rows', 'pivot',
 ]
 
 export type StepResult = {
@@ -132,8 +136,101 @@ export function validateOp(raw: unknown): Op | string {
       const n = Number(o.rows)
       return Number.isInteger(n) && n > 0 ? { op: 'limit', rows: n } : 'limit needs a positive "rows"'
     }
+    case 'convert_number': {
+      const style = o.style === 'us' || o.style === 'eu' ? o.style : 'auto'
+      return strArr(o.columns) ? { op: 'convert_number', columns: o.columns, style } : 'convert_number needs "columns"'
+    }
+    case 'convert_date': {
+      const order = o.order === 'dmy' || o.order === 'mdy' || o.order === 'ymd' ? o.order : 'auto'
+      return strArr(o.columns) ? { op: 'convert_date', columns: o.columns, order } : 'convert_date needs "columns"'
+    }
+    case 'remove_report_rows': return { op: 'remove_report_rows' }
+    case 'pivot': {
+      const func = o.func === 'count' || o.func === 'average' ? o.func : 'sum'
+      return strArr(o.rows) && isStr(o.columns) && isStr(o.value)
+        ? { op: 'pivot', rows: o.rows, columns: o.columns, value: o.value, func } : 'pivot needs "rows", "columns", "value"'
+    }
   }
   return `Unknown step "${String(o.op)}"`
+}
+
+
+// ── Parsing helpers for report exports (SAP and similar) ──
+
+/**
+ * Read numbers the way ERP exports write them: "1,234.50-" (SAP trailing minus),
+ * "(1,234.50)", "1.234,50" (European), "$ 1 234,50", "12.5%".
+ */
+export function parseLooseNumber(v: Cell, style: 'auto' | 'us' | 'eu' = 'auto'): number | null {
+  if (typeof v === 'number') return Number.isFinite(v) ? v : null
+  if (typeof v !== 'string') return null
+  let s = v.trim()
+  if (!s) return null
+  let neg = false
+  if (/^\(.*\)$/.test(s)) { neg = true; s = s.slice(1, -1).trim() }
+  if (s.endsWith('-')) { neg = !neg; s = s.slice(0, -1).trim() }
+  if (s.startsWith('-')) { neg = !neg; s = s.slice(1).trim() }
+  else if (s.startsWith('+')) s = s.slice(1).trim()
+  const pct = s.endsWith('%')
+  if (pct) s = s.slice(0, -1).trim()
+  s = s.replace(/^[A-Z]{3}\s*|\s*[A-Z]{3}$|[$€£₩]/g, '').replace(/[\s\u00a0\u202f']/g, '')
+  if (!/^[\d.,]+$/.test(s) || !/\d/.test(s)) return null
+  const lastDot = s.lastIndexOf('.'), lastComma = s.lastIndexOf(',')
+  let decimal: '.' | ',' | null
+  if (style === 'us') decimal = '.'
+  else if (style === 'eu') decimal = ','
+  else if (lastDot >= 0 && lastComma >= 0) decimal = lastDot > lastComma ? '.' : ','
+  else if (lastComma >= 0) decimal = /^\d{1,3}(,\d{3})+$/.test(s) ? null : ','
+  else if (lastDot >= 0) decimal = /^\d{1,3}(\.\d{3}){2,}$/.test(s) ? null : '.'
+  else decimal = null
+  const normalised = decimal === ','
+    ? s.replace(/\./g, '').replace(',', '.')
+    : s.replace(/,/g, '')
+  if ((normalised.match(/\./g) ?? []).length > 1) return null
+  const n = Number(normalised)
+  if (!Number.isFinite(n)) return null
+  const out = (neg ? -n : n) / (pct ? 100 : 1)
+  return Math.round(out * 1e9) / 1e9
+}
+
+/** Read dates as ERP exports write them: 31.05.2026, 20260531, 05/31/2026, 2026-05-31. Returns YYYY-MM-DD. */
+export function parseLooseDate(v: Cell, order: 'auto' | 'dmy' | 'mdy' | 'ymd' = 'auto'): string | null {
+  if (v === null || typeof v === 'boolean') return null
+  const s = String(v).trim()
+  const pad = (n: number) => String(n).padStart(2, '0')
+  const ok = (y: number, m: number, d: number) => {
+    if (y < 1900 || y > 2200 || m < 1 || m > 12 || d < 1 || d > 31) return null
+    const dt = new Date(Date.UTC(y, m - 1, d))
+    return dt.getUTCMonth() === m - 1 ? `${y}-${pad(m)}-${pad(d)}` : null
+  }
+  let m = /^(\d{4})(\d{2})(\d{2})$/.exec(s)
+  if (m) return ok(+m[1], +m[2], +m[3])
+  m = /^(\d{4})[-./](\d{1,2})[-./](\d{1,2})(?:[ T].*)?$/.exec(s)
+  if (m) return ok(+m[1], +m[2], +m[3])
+  m = /^(\d{1,2})([-./])(\d{1,2})\2(\d{2}|\d{4})(?:\s.*)?$/.exec(s)
+  if (m) {
+    const a = +m[1], b = +m[3]
+    let y = +m[4]
+    if (y < 100) y += 2000
+    let dmy: boolean
+    if (order === 'dmy') dmy = true
+    else if (order === 'mdy') dmy = false
+    else if (a > 12) dmy = true
+    else if (b > 12) dmy = false
+    else dmy = m[2] !== '/'
+    return dmy ? ok(y, b, a) : ok(y, a, b)
+  }
+  return null
+}
+
+const REPORT_ROW = /^\s*(\*+|(grand\s+|sub-?)?totals?\b|result\b|summe\b)/i
+
+/** Subtotal lines ("*", "Total", "Result") and page-break repeats of the header row. */
+export function isReportRow(row: Cell[], columns: string[]): boolean {
+  const strings = row.filter((c): c is string => typeof c === 'string')
+  if (strings.some((c) => REPORT_ROW.test(c))) return true
+  const headerHits = row.filter((c, i) => typeof c === 'string' && keyOf(c) === keyOf(columns[i])).length
+  return headerHits >= Math.max(2, Math.ceil(columns.length * 0.6))
 }
 
 // ── Helpers ────────────────────────────────────────────────
@@ -497,6 +594,100 @@ export function applyOp(wb: Workbook, current: Table, op: Op): { table: Table; a
       const before = t.rows.length
       t.rows = t.rows.slice(0, op.rows)
       return { table: t, affected: before - t.rows.length }
+    }
+    case 'convert_number': {
+      const idxs = op.columns.map((c) => col(t, c))
+      let affected = 0
+      let failed = 0
+      for (const row of t.rows) {
+        for (const i of idxs) {
+          const v = row[i]
+          if (typeof v !== 'string') continue
+          if (v.trim() === '') { row[i] = null; continue }
+          const n = parseLooseNumber(v, op.style)
+          if (n === null) failed++
+          else { row[i] = n; affected++ }
+        }
+      }
+      idxs.forEach((i) => dropFormula(t, t.columns[i]))
+      if (failed > 0 && affected === 0) throw new StepError(`No values in ${op.columns.join(', ')} look like numbers`)
+      const ref = cellRef(t, t.columns[idxs[0]])
+      const excel = op.style === 'eu'
+        ? `=NUMBERVALUE(SUBSTITUTE(${ref},"-",""),",",".")*IF(RIGHT(${ref},1)="-",-1,1)`
+        : `=VALUE(SUBSTITUTE(SUBSTITUTE(${ref},",",""),"-",""))*IF(RIGHT(${ref},1)="-",-1,1)`
+      return { table: t, affected, excel }
+    }
+    case 'convert_date': {
+      const idxs = op.columns.map((c) => col(t, c))
+      let affected = 0
+      let failed = 0
+      for (const row of t.rows) {
+        for (const i of idxs) {
+          const v = row[i]
+          if (v === null || (typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v))) continue
+          const d = parseLooseDate(v, op.order)
+          if (d === null) failed++
+          else { row[i] = d; affected++ }
+        }
+      }
+      idxs.forEach((i) => dropFormula(t, t.columns[i]))
+      if (failed > 0 && affected === 0) throw new StepError(`No values in ${op.columns.join(', ')} look like dates`)
+      const ref = cellRef(t, t.columns[idxs[0]])
+      return { table: t, affected, excel: `=DATE(RIGHT(${ref},4),MID(${ref},4,2),LEFT(${ref},2))` }
+    }
+    case 'remove_report_rows': {
+      const before = t.rows.length
+      t.rows = t.rows.filter((row) => !isReportRow(row, t.columns))
+      const first = t.columns[0]
+      return { table: t, affected: before - t.rows.length, excel: `=OR(LEFT(${cellRef(t, first)},1)="*",ISNUMBER(SEARCH("total",${cellRef(t, first)})))` }
+    }
+    case 'pivot': {
+      const rIdx = op.rows.map((c) => col(t, c))
+      const cIdx = col(t, op.columns)
+      const vIdx = col(t, op.value)
+      const heads: string[] = []
+      const headKey = new Map<string, string>()
+      for (const row of t.rows) {
+        const k = keyOf(row[cIdx])
+        if (!headKey.has(k)) {
+          if (heads.length >= 60) throw new StepError(`${t.columns[cIdx]} has more than 60 different values — too many columns`)
+          const label = row[cIdx] === null || String(row[cIdx]).trim() === '' ? '(blank)' : String(row[cIdx]).trim()
+          headKey.set(k, label)
+          heads.push(label)
+        }
+      }
+      heads.sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
+      const order = new Map(heads.map((h, i) => [h, i]))
+      const groups = new Map<string, { key: Cell[]; sums: number[]; counts: number[] }>()
+      for (const row of t.rows) {
+        const k = rIdx.map((i) => keyOf(row[i])).join('\u0001')
+        let g = groups.get(k)
+        if (!g) { g = { key: rIdx.map((i) => row[i]), sums: heads.map(() => 0), counts: heads.map(() => 0) }; groups.set(k, g) }
+        const h = order.get(headKey.get(keyOf(row[cIdx]))!)!
+        const n = toNumber(row[vIdx])
+        if (op.func === 'count') { if (!isBlank(row[vIdx])) g.counts[h]++ }
+        else if (n !== null && !isBlank(row[vIdx])) { g.sums[h] += n; g.counts[h]++ }
+      }
+      const out: Table = { name: t.name, columns: [...rIdx.map((i) => t.columns[i])], rows: [], formulas: {}, formats: {} }
+      const vFormat = t.formats[t.columns[vIdx]]
+      for (const h of heads) {
+        const name = uniqueName(out, h)
+        out.columns.push(name)
+        if (vFormat && op.func !== 'count') out.formats[name] = vFormat
+      }
+      for (const g of groups.values()) {
+        out.rows.push([...g.key, ...heads.map((_, i) => {
+          if (op.func === 'count') return g.counts[i]
+          if (g.counts[i] === 0) return null
+          const v = op.func === 'average' ? g.sums[i] / g.counts[i] : g.sums[i]
+          return Math.round(v * 1e6) / 1e6
+        })])
+      }
+      out.rows.sort((a, b) => String(a[0] ?? '').localeCompare(String(b[0] ?? ''), undefined, { numeric: true }))
+      const fn = op.func === 'count' ? 'COUNTIFS' : op.func === 'average' ? 'AVERAGEIFS' : 'SUMIFS'
+      const crit = rIdx.slice(0, 2).map((ri, j) => `${wholeCol(t, t.columns[ri], t.name)},$${columnLetter(j)}2`).join(',')
+      const excel = `=${fn}(${fn === 'COUNTIFS' ? '' : wholeCol(t, t.columns[vIdx], t.name) + ','}${crit},${wholeCol(t, t.columns[cIdx], t.name)},${columnLetter(rIdx.length)}$1)`
+      return { table: out, excel }
     }
   }
 }

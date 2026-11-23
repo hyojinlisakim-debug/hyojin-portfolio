@@ -125,8 +125,31 @@ function serialToDate(serial: number, date1904: boolean): string {
 
 // ── Grid → Table ───────────────────────────────────────────
 
+const filledCount = (r: Cell[] | undefined) => (r ? r.filter((c) => c !== null && c !== undefined && String(c).trim() !== '').length : 0)
+
+/**
+ * Report exports (SAP ALV, ERP extracts) often start with a title, run date and
+ * user before the real header. Pick the first row, among the first 30, that is
+ * nearly as wide as the widest row and mostly text.
+ */
+function findHeaderRow(grid: Cell[][]): number {
+  const first = grid.findIndex((r) => filledCount(r) > 0)
+  if (first < 0) return -1
+  const window = grid.slice(0, 30)
+  const widest = Math.max(...window.map(filledCount))
+  if (widest < 2) return first
+  for (let i = first; i < window.length; i++) {
+    const r = window[i]
+    const n = filledCount(r)
+    if (n < Math.max(2, Math.ceil(widest * 0.6))) continue
+    const text = r.filter((c) => typeof c === 'string' && c.trim() !== '' && !/^[-+]?[\d.,]+-?$/.test(c.trim())).length
+    if (text / n >= 0.6) return i
+  }
+  return first
+}
+
 function gridToTable(name: string, grid: Cell[][], cellFormats: (ColumnFormat | null)[][]): Table {
-  const headerRow = grid.findIndex((r) => r && r.some((c) => c !== null && String(c).trim() !== ''))
+  const headerRow = findHeaderRow(grid)
   if (headerRow < 0) return { name, columns: [], rows: [], formulas: {}, formats: {} }
   const width = Math.max(...grid.map((r) => (r ? r.length : 0)))
   const body = grid.slice(headerRow + 1).filter((r) => r && r.some((c) => c !== null && String(c).trim() !== ''))
@@ -246,9 +269,18 @@ export async function readXlsx(buf: ArrayBuffer, fileName: string): Promise<Work
 // ── CSV ────────────────────────────────────────────────────
 
 export function readCsv(text: string, fileName: string): Workbook {
-  const clean = text.replace(/^﻿/, '')
-  const firstLine = clean.split(/\r?\n/, 1)[0] ?? ''
-  const delim = [',', ';', '\t'].map((d) => ({ d, n: firstLine.split(d).length })).sort((a, b) => b.n - a.n)[0].d
+  const clean = text.replace(/^\uFEFF/, '')
+  const sample = clean.split(/\r?\n/).slice(0, 40).filter((l) => l.trim() !== '' && !/^[-=\s|]+$/.test(l))
+  // Pick the delimiter that splits the most lines into the same, largest number of fields.
+  const delim = [',', ';', '\t', '|']
+    .map((d) => {
+      const counts = sample.map((l) => l.split(d).length).filter((n) => n > 1)
+      const freq = new Map<number, number>()
+      counts.forEach((n) => freq.set(n, (freq.get(n) ?? 0) + 1))
+      const best = [...freq.entries()].sort((x, y) => y[1] - x[1] || y[0] - x[0])[0]
+      return { d, score: best ? best[1] * Math.log2(best[0]) : 0 }
+    })
+    .sort((x, y) => y.score - x.score)[0].d
   const rows: string[][] = []
   let row: string[] = []
   let field = ''
@@ -259,7 +291,7 @@ export function readCsv(text: string, fileName: string): Workbook {
       if (ch === '"' && clean[i + 1] === '"') { field += '"'; i++ }
       else if (ch === '"') quoted = false
       else field += ch
-    } else if (ch === '"') quoted = true
+    } else if (ch === '"' && field.trim() === '') { quoted = true; field = '' }
     else if (ch === delim) { row.push(field); field = '' }
     else if (ch === '\n' || ch === '\r') {
       if (ch === '\r' && clean[i + 1] === '\n') i++
@@ -267,13 +299,24 @@ export function readCsv(text: string, fileName: string): Workbook {
     } else field += ch
   }
   if (field !== '' || row.length) { row.push(field); rows.push(row) }
-  const grid: Cell[][] = rows.map((r) => r.map((s) => {
-    const t = s.trim()
-    if (t === '') return null
-    if (/^-?(0|[1-9]\d*)(\.\d+)?$/.test(t)) return Number(t)
-    if (/^(true|false)$/i.test(t)) return t.toLowerCase() === 'true'
-    return s
-  }))
+  const grid: Cell[][] = rows
+    // SAP "unconverted" lists draw separator lines of dashes.
+    .filter((r) => r.some((c) => c.trim() !== '' && !/^[-=\s]+$/.test(c)))
+    .map((r) => {
+      let cells = r
+      // Pipe-framed lines: "| a | b |" → drop the empty first/last field.
+      if (delim === '|') {
+        if (cells.length && cells[0].trim() === '') cells = cells.slice(1)
+        if (cells.length && cells[cells.length - 1].trim() === '') cells = cells.slice(0, -1)
+      }
+      return cells.map((s) => {
+        const t = s.trim()
+        if (t === '') return null
+        if (/^-?(0|[1-9]\d*)(\.\d+)?$/.test(t)) return Number(t)
+        if (/^(true|false)$/i.test(t)) return t.toLowerCase() === 'true'
+        return t
+      })
+    })
   const table = gridToTable(fileName.replace(/\.[^.]+$/, '').slice(0, 31) || 'Sheet1', grid, [])
   if (!table.columns.length) throw new FileReadError('empty')
   return { fileName, sheets: [table] }
