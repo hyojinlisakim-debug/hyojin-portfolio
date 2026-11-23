@@ -4,6 +4,7 @@ import { type Cell, type ColumnFormat, type Lang, type Table, type Workbook, MAX
 import { type Op, type StepResult, profile, runPipeline, summarize, toCsv, validateOp } from '@/lib/excel-ai/ops'
 import { FileReadError, readCsv, readXlsx, writeXlsx } from '@/lib/excel-ai/xlsx'
 import { type QualityIssue, checkQuality } from '@/lib/excel-ai/quality'
+import SqlPanel from './SqlPanel'
 import { DICTS, LANGS, LOCALES, type Dict, describeStep, fmt } from '@/lib/excel-ai/i18n'
 import { readLang, serverLang, subscribeLang, writeLang } from '@/lib/excel-ai/lang'
 
@@ -560,6 +561,20 @@ export default function ExcelAiClient() {
                   {chatError && <p className="xl-error">{d[chatError]}</p>}
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* ── SQL ── */}
+          {wb && table && (
+            <div style={{ marginTop: '1rem' }}>
+              <SqlPanel
+                wb={wb}
+                result={table}
+                lang={lang}
+                d={d}
+                sample={wb.fileName === SAMPLE_NAME ? 'utility' : wb.fileName === SAP_SAMPLE_NAME ? 'sap' : null}
+                formatCell={(v, l) => formatCell(v, undefined, l)}
+              />
             </div>
           )}
         </div>

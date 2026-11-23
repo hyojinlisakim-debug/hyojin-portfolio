@@ -1073,3 +1073,16 @@ h1.hx-title span { color: var(--accent); }
 .home-v2 .edu-grid { max-width: 1280px; }
 /* With the research section hidden, education and contact would both be sand. */
 .home-v2 #contact { background: var(--linen); }
+/* SQL panel (lab) */
+.xl-sql { display: grid; grid-template-columns: minmax(180px, 240px) minmax(0, 1fr); gap: 1rem; align-items: start; }
+.xl-schema { border: 1px solid var(--border); border-radius: 10px; background: var(--bg); padding: 0.75rem; max-height: 420px; overflow: auto; font-size: 13px; }
+.xl-schema details { margin-bottom: 0.4rem; }
+.xl-schema summary { cursor: pointer; display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
+.xl-schema ul { list-style: none; margin: 0.25rem 0 0.5rem 0.9rem; }
+.xl-schema li { line-height: 1.5; }
+.xl-schema-rows { font-size: 11.5px; color: var(--muted); }
+.xl-ident { background: none; border: none; padding: 0; cursor: pointer; font-family: var(--mono); font-size: 12.5px; color: var(--accent); text-align: left; }
+.xl-ident.col { color: var(--text); }
+.xl-ident:hover { text-decoration: underline; }
+.xl-code { font-family: var(--mono); font-size: 13px; line-height: 1.6; min-height: 200px; white-space: pre; tab-size: 2; }
+@media (max-width: 900px) { .xl-sql { grid-template-columns: minmax(0, 1fr); } .xl-schema { max-height: 220px; } }
