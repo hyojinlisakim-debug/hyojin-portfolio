@@ -5,6 +5,8 @@ import { type Op, type StepResult, profile, runPipeline, summarize, toCsv, valid
 import { FileReadError, readCsv, readXlsx, writeXlsx } from '@/lib/excel-ai/xlsx'
 import { type QualityIssue, checkQuality } from '@/lib/excel-ai/quality'
 import SqlPanel from './SqlPanel'
+import ReportView from './ReportView'
+import { toPowerQuery } from '@/lib/excel-ai/powerquery'
 import { DICTS, LANGS, LOCALES, type Dict, describeStep, fmt } from '@/lib/excel-ai/i18n'
 import { readLang, serverLang, subscribeLang, writeLang } from '@/lib/excel-ai/lang'
 
@@ -63,12 +65,18 @@ export default function ExcelAiClient() {
   const [question, setQuestion] = useState('')
   const [asking, setAsking] = useState(false)
   const [chatError, setChatError] = useState<ErrKey | null>(null)
+  const [resultTab, setResultTab] = useState<'table' | 'sap' | 'bi'>('table')
+  const [showPq, setShowPq] = useState(false)
   const [quality, setQuality] = useState<{ table: Table; issues: QualityIssue[] } | null>(null)
   const fileInput = useRef<HTMLInputElement>(null)
 
   const allSteps = useMemo(() => requests.flatMap((r) => r.steps), [requests])
   const pipeline = useMemo(
     () => (wb && startSheet ? runPipeline(wb, startSheet, allSteps) : null),
+    [wb, startSheet, allSteps],
+  )
+  const powerQuery = useMemo(
+    () => (wb && startSheet && allSteps.length ? toPowerQuery(wb, startSheet, allSteps) : ''),
     [wb, startSheet, allSteps],
   )
   const resultsByRequest = useMemo(() => {
@@ -246,6 +254,15 @@ export default function ExcelAiClient() {
       { table: { ...pipeline.table, name: 'Result' }, liveFormulas: true },
       { table: stepsTable, wrapColumns: [1, 2, 3] },
       ...(qualityTable ? [{ table: qualityTable, wrapColumns: [3] }] : []),
+      ...(powerQuery ? [{
+        table: {
+          name: 'Power_Query',
+          columns: ['Power Query (M) — Data > Get Data > Blank Query > Advanced Editor'],
+          rows: powerQuery.split('\n').map((l) => [l] as Cell[]),
+          formulas: {},
+          formats: {},
+        },
+      }] : []),
       ...wb.sheets.map((t) => ({ table: t })),
     ])
     const blob = new Blob([bytes.buffer as ArrayBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
@@ -448,7 +465,7 @@ export default function ExcelAiClient() {
 
           {/* ── Steps + Result ── */}
           {wb && pipeline && table && (
-            <div className="xl-grid">
+            <div className={`xl-grid${resultTab !== 'table' ? ' wide' : ''}`}>
               <div className="xl-card">
                 <span className="xl-label">{d.stepsTitle}</span>
                 {requests.length === 0 && <p className="xl-empty">{d.noSteps}</p>}
@@ -490,6 +507,22 @@ export default function ExcelAiClient() {
                     </ol>
                   </div>
                 ))}
+                {powerQuery && (
+                  <div className="xl-req">
+                    <div className="xl-row" style={{ marginTop: 0 }}>
+                      <button type="button" className="xl-btn" onClick={() => setShowPq((v) => !v)} aria-expanded={showPq}>
+                        {showPq ? d.pqHide : d.pqShow}
+                      </button>
+                      {showPq && <button type="button" className="xl-btn" onClick={() => void copy(powerQuery, 'pq')}>{copied === 'pq' ? d.copied : d.pqCopy}</button>}
+                    </div>
+                    {showPq && (
+                      <>
+                        <p className="xl-meta">{d.pqHint}</p>
+                        <pre className="xl-code-block">{powerQuery}</pre>
+                      </>
+                    )}
+                  </div>
+                )}
               </div>
 
               <div>
@@ -498,6 +531,16 @@ export default function ExcelAiClient() {
                     <span className="xl-label" style={{ marginBottom: 0 }}>{d.resultTitle} · {table.name}</span>
                     <button type="button" className="xl-btn primary" onClick={download} title={d.downloadHint}>{d.download}</button>
                   </div>
+                  <div className="xl-tabs" role="tablist" aria-label={d.resultTitle} style={{ marginTop: '0.9rem' }}>
+                    {(['table', 'sap', 'bi'] as const).map((tab) => (
+                      <button key={tab} type="button" role="tab" aria-selected={resultTab === tab} className="xl-tab" onClick={() => setResultTab(tab)}>
+                        {tab === 'table' ? d.tabTable : tab === 'sap' ? d.tabSap : d.tabBi}
+                      </button>
+                    ))}
+                  </div>
+                  {resultTab !== 'table' ? (
+                    <ReportView mode={resultTab} table={table} fileName={wb.fileName} lang={lang} d={d} formatCell={formatCell} />
+                  ) : (<>
                   <p className="xl-meta">
                     {fmt(d.showing, {
                       shown: Math.min(PREVIEW_ROWS, table.rows.length).toLocaleString(LOCALES[lang]),
@@ -532,6 +575,7 @@ export default function ExcelAiClient() {
                       </table>
                     </div>
                   )}
+                  </>)}
                 </div>
 
                 <div className="xl-card">

@@ -6,6 +6,7 @@ import { summarize } from '@/lib/excel-ai/ops'
 import { writeXlsx } from '@/lib/excel-ai/xlsx'
 import { type QueryResult, type SqlDb, buildDatabase, loadSqlJs, planTables, quoteIdent, runSql } from '@/lib/excel-ai/sqlite'
 import { SQL_EXAMPLES } from '@/lib/excel-ai/sql-examples'
+import SqlHelper from './SqlHelper'
 
 const PREVIEW = 200
 const isPlainIdent = (s: string) => /^[A-Za-z_][A-Za-z0-9_]*$/.test(s)
@@ -31,6 +32,7 @@ export default function SqlPanel({ wb, result, lang, d, sample, formatCell }: Pr
   const [ask, setAsk] = useState('')
   const [asking, setAsking] = useState(false)
   const [aiNote, setAiNote] = useState('')
+  const [mode, setMode] = useState<'write' | 'build' | 'learn'>('write')
   const editor = useRef<HTMLTextAreaElement>(null)
   const cache = useRef<{ wb: Workbook; result: Table; db: SqlDb } | null>(null)
 
@@ -149,7 +151,23 @@ export default function SqlPanel({ wb, result, lang, d, sample, formatCell }: Pr
     <div className="xl-card">
       <span className="xl-label">{d.sqlTitle}</span>
       <p className="xl-meta" style={{ marginTop: 0 }}>{d.sqlDesc}</p>
-      <div className="xl-sql">
+      <div className="xl-tabs" role="tablist" aria-label={d.sqlTitle}>
+        {(['write', 'build', 'learn'] as const).map((m) => (
+          <button key={m} type="button" role="tab" aria-selected={mode === m} className="xl-tab" onClick={() => setMode(m)}>
+            {m === 'write' ? d.sqlModeWrite : m === 'build' ? d.sqlModeBuild : d.sqlModeLearn}
+          </button>
+        ))}
+      </div>
+      {mode !== 'write' && (
+        <SqlHelper
+          key={`${mode}-${tables.map((t) => t.name).join('|')}`}
+          mode={mode}
+          tables={tables}
+          d={d}
+          onUse={(q) => { setSql(q); setAiNote(''); setMode('write'); void run(q) }}
+        />
+      )}
+      <div className="xl-sql" hidden={mode !== 'write'}>
         <aside className="xl-schema" aria-label={d.sqlTables}>
           <p className="xl-meta" style={{ margin: '0 0 0.5rem' }}>{d.sqlInsertHint}</p>
           {tables.map((t) => (

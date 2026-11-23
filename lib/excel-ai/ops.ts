@@ -438,7 +438,16 @@ export function applyOp(wb: Workbook, current: Table, op: Op): { table: Table; a
         if (f) t.formats[n] = f
       })
       const first = bring[0]
-      const excel = `=INDEX(${wholeCol(src, src.columns[first], src.name)},MATCH(${cellRef(t, t.columns[mi])},${wholeCol(src, src.columns[ki], src.name)},0))`
+      const key = cellRef(t, t.columns[mi])
+      const sheetRef = quoteSheet(src.name)
+      const lines: string[] = []
+      // VLOOKUP only looks to the right of the key column; otherwise show XLOOKUP / INDEX-MATCH.
+      if (first > ki) {
+        lines.push(`=VLOOKUP(${key},${sheetRef}!$${columnLetter(ki)}:$${columnLetter(first)},${first - ki + 1},FALSE)`)
+      }
+      lines.push(`=XLOOKUP(${key},${wholeCol(src, src.columns[ki], src.name)},${wholeCol(src, src.columns[first], src.name)})`)
+      lines.push(`=INDEX(${wholeCol(src, src.columns[first], src.name)},MATCH(${key},${wholeCol(src, src.columns[ki], src.name)},0))`)
+      const excel = lines.join('\n')
       return { table: t, affected: missing, excel }
     }
     case 'group_by': {
@@ -483,7 +492,9 @@ export function applyOp(wb: Workbook, current: Table, op: Op): { table: Table; a
       const excel = first
         ? `=${first.func === 'average' ? 'AVERAGEIFS' : first.func === 'count' ? 'COUNTIFS' : 'SUMIFS'}(${first.func === 'count' ? '' : wholeCol(t, t.columns[first.i], t.name) + ','}${crit})`
         : `=COUNTIFS(${crit})`
-      return { table: out, excel }
+      const label = (a: (typeof aggs)[number]) => `${a.func === 'average' ? 'Average' : a.func === 'count_distinct' ? 'Distinct count' : a.func[0].toUpperCase() + a.func.slice(1)} of ${a.column ?? 'rows'}`
+      const pivotNote = `PivotTable: Rows = ${byIdx.map((i) => t.columns[i]).join(', ')} · Values = ${aggs.map(label).join(', ')}`
+      return { table: out, excel: `${excel}\n${pivotNote}` }
     }
     case 'reconcile': {
       const other = sheet(wb, op.with_sheet)
@@ -687,7 +698,8 @@ export function applyOp(wb: Workbook, current: Table, op: Op): { table: Table; a
       const fn = op.func === 'count' ? 'COUNTIFS' : op.func === 'average' ? 'AVERAGEIFS' : 'SUMIFS'
       const crit = rIdx.slice(0, 2).map((ri, j) => `${wholeCol(t, t.columns[ri], t.name)},$${columnLetter(j)}2`).join(',')
       const excel = `=${fn}(${fn === 'COUNTIFS' ? '' : wholeCol(t, t.columns[vIdx], t.name) + ','}${crit},${wholeCol(t, t.columns[cIdx], t.name)},${columnLetter(rIdx.length)}$1)`
-      return { table: out, excel }
+      const pivotNote = `PivotTable: Rows = ${rIdx.map((i) => t.columns[i]).join(', ')} · Columns = ${t.columns[cIdx]} · Values = ${op.func === 'count' ? 'Count' : op.func === 'average' ? 'Average' : 'Sum'} of ${t.columns[vIdx]}`
+      return { table: out, excel: `${excel}\n${pivotNote}` }
     }
   }
 }

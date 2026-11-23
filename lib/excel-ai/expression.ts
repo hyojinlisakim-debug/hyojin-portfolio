@@ -98,6 +98,16 @@ export function parse(src: string, columns?: string[]): Node {
     pos++
   }
 
+  // Lenient: infix AND / OR (people and models often write them), lowest precedence.
+  const isWord = (w: string) => peek()?.t === 'id' && String(peek()!.v).toUpperCase() === w && !(tokens[pos + 1]?.t === 'op' && tokens[pos + 1].v === '(')
+  const logical = (): Node => {
+    let left = comparison()
+    while (isWord('AND') || isWord('OR')) {
+      const op = String(tokens[pos++].v).toUpperCase()
+      left = { type: 'bin', op, left, right: comparison() }
+    }
+    return left
+  }
   const comparison = (): Node => {
     let left = concat()
     while (peek()?.t === 'op' && ['=', '<>', '<', '>', '<=', '>='].includes(String(peek()!.v))) {
@@ -145,7 +155,7 @@ export function parse(src: string, columns?: string[]): Node {
     if (tk.t === 'str') return { type: 'str', value: tk.v }
     if (tk.t === 'col') return { type: 'col', name: tk.v }
     if (tk.t === 'op' && tk.v === '(') {
-      const e = comparison()
+      const e = logical()
       expectOp(')')
       return e
     }
@@ -158,8 +168,8 @@ export function parse(src: string, columns?: string[]): Node {
         }
         const args: Node[] = []
         if (!isOp(')')) {
-          args.push(comparison())
-          while (isOp(',')) { pos++; args.push(comparison()) }
+          args.push(logical())
+          while (isOp(',')) { pos++; args.push(logical()) }
         }
         expectOp(')')
         return { type: 'call', name: upper, args }
@@ -173,7 +183,7 @@ export function parse(src: string, columns?: string[]): Node {
     throw new ExpressionError(`Unexpected "${tk.v}"`)
   }
 
-  const node = comparison()
+  const node = logical()
   if (pos < tokens.length) throw new ExpressionError(`Unexpected "${String(tokens[pos].v)}"`)
   return node
 }
@@ -269,6 +279,11 @@ function ev(node: Node, row: Cell[], index: Record<string, number>): Val {
     case 'bin': {
       const l = ev(node.left, row, index)
       const r = ev(node.right, row, index)
+      if (node.op === 'AND' || node.op === 'OR') {
+        const a = truthy(l), b = truthy(r)
+        if (a === ERR || b === ERR) return ERR
+        return node.op === 'AND' ? a && b : a || b
+      }
       if (node.op === '&') {
         const a = str(l), b = str(r)
         return a === ERR || b === ERR ? ERR : a + b
@@ -387,6 +402,7 @@ export function toExcel(node: Node, ref: (column: string) => string): string {
       case 'col': return ref(n.name)
       case 'unary': return `-${p(n.arg, 6)}`
       case 'bin': {
+        if (n.op === 'AND' || n.op === 'OR') return `${n.op}(${p(n.left, 0)},${p(n.right, 0)})`
         const prec = PREC[n.op]
         const s = `${p(n.left, prec)}${n.op}${p(n.right, prec + 1)}`
         return prec < parentPrec ? `(${s})` : s

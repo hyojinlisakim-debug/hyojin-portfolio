@@ -182,7 +182,7 @@ function gridToTable(name: string, grid: Cell[][], cellFormats: (ColumnFormat | 
     const best = Object.entries(counts).sort((a, b) => b[1] - a[1])[0]
     if (best) formats[columns[j]] = best[0] as ColumnFormat
   })
-  return { name, columns, rows, formulas: {}, formats }
+  return { name, columns, rows, formulas: {}, formats, skipRows: headerRow }
 }
 
 export async function readXlsx(buf: ArrayBuffer, fileName: string): Promise<Workbook> {
@@ -398,14 +398,27 @@ const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&l
   .replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g, '')
 
 /** Style indexes in the generated styles.xml. */
-const S = { header: 1, number: 2, currency: 3, percent: 4, wrap: 5 } as const
+const S = {
+  header: 1, number: 2, currency: 3, percent: 4, wrap: 5,
+  subGeneral: 6, subNumber: 7, subCurrency: 8, subPercent: 9, title: 10,
+  totGeneral: 11, totNumber: 12, totCurrency: 13, totPercent: 14,
+} as const
 
 export type ExportSheet = {
   table: Table
   /** Write stored column formulas as live Excel formulas (with cached values). */
   liveFormulas?: boolean
   wrapColumns?: number[]
+  /** Report title lines written above the header (a blank row follows them). */
+  titleRows?: string[]
+  /** Explicit formulas by data row index and column index, e.g. SUBTOTAL rows. Row numbers inside are final sheet rows. */
+  cellFormulas?: Record<number, Record<number, string>>
+  /** Data row indexes to show bold with a highlight (subtotals, totals). */
+  emphasisRows?: Record<number, 'subtotal' | 'total'>
 }
+
+/** Sheet row number of the header for a sheet with `titleCount` title lines. */
+export const headerRowFor = (titleCount: number) => (titleCount ? titleCount + 2 : 1)
 
 function safeSheetName(name: string, used: Set<string>): string {
   const base = name.replace(/[[\]:*?/\\]/g, '_').slice(0, 31) || 'Sheet'
@@ -431,8 +444,17 @@ function sheetXml(s: ExportSheet): string {
       } catch { /* fall back to values */ }
     }
   }
-  const styleFor = (ci: number, v: Cell) => {
+  const titles = s.titleRows ?? []
+  const headerRow = headerRowFor(titles.length)
+  const styleFor = (ci: number, v: Cell, emphasis?: 'subtotal' | 'total') => {
     const f = t.formats[t.columns[ci]]
+    if (emphasis) {
+      const sub = emphasis === 'subtotal'
+      if (typeof v !== 'number') return sub ? S.subGeneral : S.totGeneral
+      if (f === 'currency') return sub ? S.subCurrency : S.totCurrency
+      if (f === 'percent') return sub ? S.subPercent : S.totPercent
+      return sub ? S.subNumber : S.totNumber
+    }
     if (typeof v !== 'number') return s.wrapColumns?.includes(ci) ? S.wrap : 0
     if (f === 'currency') return S.currency
     if (f === 'percent') return S.percent
@@ -451,28 +473,41 @@ function sheetXml(s: ExportSheet): string {
   const out: string[] = []
   out.push('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>')
   out.push('<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">')
-  out.push('<sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews>')
+  out.push(`<sheetViews><sheetView workbookViewId="0"><pane ySplit="${headerRow}" topLeftCell="A${headerRow + 1}" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews>`)
   out.push('<sheetFormatPr defaultRowHeight="15"/>')
   if (widths.length) out.push(`<cols>${widths.map((w, i) => `<col min="${i + 1}" max="${i + 1}" width="${w}" customWidth="1"/>`).join('')}</cols>`)
   out.push('<sheetData>')
-  out.push(`<row r="1">${t.columns.map((c, i) => `<c r="${letters[i]}1" t="inlineStr" s="${S.header}"><is><t>${esc(c)}</t></is></c>`).join('')}</row>`)
+  titles.forEach((line, i) => {
+    out.push(`<row r="${i + 1}"><c r="A${i + 1}" t="inlineStr"${i === 0 ? ` s="${S.title}"` : ''}><is><t xml:space="preserve">${esc(line)}</t></is></c></row>`)
+  })
+  out.push(`<row r="${headerRow}">${t.columns.map((c, i) => `<c r="${letters[i]}${headerRow}" t="inlineStr" s="${S.header}"><is><t>${esc(c)}</t></is></c>`).join('')}</row>`)
   t.rows.forEach((row, ri) => {
-    const r = ri + 2
+    const r = ri + headerRow + 1
+    const emphasis = s.emphasisRows?.[ri]
+    const explicit = s.cellFormulas?.[ri]
     const cells: string[] = []
     row.forEach((v, ci) => {
       const ref = `${letters[ci]}${r}`
-      const st = styleFor(ci, v)
+      const st = styleFor(ci, v, emphasis)
       const sAttr = st ? ` s="${st}"` : ''
+      const given = explicit?.[ci]
       const fa = formulaAsts.get(ci)
-      if (fa && fa.refs.every((name) => row[t.columns.indexOf(name)] !== null)) {
-        const f = esc(toExcel(fa.node, (name) => `${letters[t.columns.indexOf(name)]}${r}`))
-        if (typeof v === 'number') cells.push(`<c r="${ref}"${sAttr}><f>${f}</f><v>${v}</v></c>`)
-        else if (typeof v === 'boolean') cells.push(`<c r="${ref}" t="b"${sAttr}><f>${f}</f><v>${v ? 1 : 0}</v></c>`)
-        else if (typeof v === 'string') cells.push(`<c r="${ref}" t="str"${sAttr}><f>${f}</f><v>${esc(v)}</v></c>`)
-        else cells.push(`<c r="${ref}"${sAttr}><f>${f}</f></c>`)
+      const formula = given !== undefined
+        ? esc(given.replace(/^=/, ''))
+        : fa && fa.refs.every((name) => row[t.columns.indexOf(name)] !== null)
+          ? esc(toExcel(fa.node, (name) => `${letters[t.columns.indexOf(name)]}${r}`))
+          : null
+      if (formula !== null) {
+        if (typeof v === 'number') cells.push(`<c r="${ref}"${sAttr}><f>${formula}</f><v>${v}</v></c>`)
+        else if (typeof v === 'boolean') cells.push(`<c r="${ref}" t="b"${sAttr}><f>${formula}</f><v>${v ? 1 : 0}</v></c>`)
+        else if (typeof v === 'string') cells.push(`<c r="${ref}" t="str"${sAttr}><f>${formula}</f><v>${esc(v)}</v></c>`)
+        else cells.push(`<c r="${ref}"${sAttr}><f>${formula}</f></c>`)
         return
       }
-      if (v === null) return
+      if (v === null) {
+        if (emphasis) cells.push(`<c r="${ref}"${sAttr}/>`)
+        return
+      }
       if (typeof v === 'number') cells.push(`<c r="${ref}"${sAttr}><v>${v}</v></c>`)
       else if (typeof v === 'boolean') cells.push(`<c r="${ref}" t="b"${sAttr}><v>${v ? 1 : 0}</v></c>`)
       else cells.push(`<c r="${ref}" t="inlineStr"${sAttr}><is><t xml:space="preserve">${esc(v)}</t></is></c>`)
@@ -486,17 +521,26 @@ function sheetXml(s: ExportSheet): string {
 const STYLES = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
 <numFmts count="1"><numFmt numFmtId="164" formatCode="&quot;$&quot;#,##0.00"/></numFmts>
-<fonts count="2"><font><sz val="10"/><name val="Arial"/></font><font><b/><sz val="10"/><color rgb="FFFFFFFF"/><name val="Arial"/></font></fonts>
-<fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF1F3A4D"/><bgColor indexed="64"/></patternFill></fill></fills>
+<fonts count="4"><font><sz val="10"/><name val="Arial"/></font><font><b/><sz val="10"/><color rgb="FFFFFFFF"/><name val="Arial"/></font><font><b/><sz val="10"/><name val="Arial"/></font><font><b/><sz val="13"/><name val="Arial"/></font></fonts>
+<fills count="5"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF1F3A4D"/><bgColor indexed="64"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FFFFF4CC"/><bgColor indexed="64"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FFFFE08A"/><bgColor indexed="64"/></patternFill></fill></fills>
 <borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders>
 <cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>
-<cellXfs count="6">
+<cellXfs count="15">
 <xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>
 <xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1"/>
 <xf numFmtId="4" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>
 <xf numFmtId="164" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>
 <xf numFmtId="10" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>
 <xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0" applyAlignment="1"><alignment wrapText="1" vertical="top"/></xf>
+<xf numFmtId="0" fontId="2" fillId="3" borderId="0" xfId="0" applyFont="1" applyFill="1"/>
+<xf numFmtId="4" fontId="2" fillId="3" borderId="0" xfId="0" applyFont="1" applyFill="1" applyNumberFormat="1"/>
+<xf numFmtId="164" fontId="2" fillId="3" borderId="0" xfId="0" applyFont="1" applyFill="1" applyNumberFormat="1"/>
+<xf numFmtId="10" fontId="2" fillId="3" borderId="0" xfId="0" applyFont="1" applyFill="1" applyNumberFormat="1"/>
+<xf numFmtId="0" fontId="3" fillId="0" borderId="0" xfId="0" applyFont="1"/>
+<xf numFmtId="0" fontId="2" fillId="4" borderId="0" xfId="0" applyFont="1" applyFill="1"/>
+<xf numFmtId="4" fontId="2" fillId="4" borderId="0" xfId="0" applyFont="1" applyFill="1" applyNumberFormat="1"/>
+<xf numFmtId="164" fontId="2" fillId="4" borderId="0" xfId="0" applyFont="1" applyFill="1" applyNumberFormat="1"/>
+<xf numFmtId="10" fontId="2" fillId="4" borderId="0" xfId="0" applyFont="1" applyFill="1" applyNumberFormat="1"/>
 </cellXfs>
 <cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>
 </styleSheet>`

@@ -9,6 +9,8 @@ export type Table = {
   /** Column name → row-level expression, kept so the export can write live Excel formulas. */
   formulas: Record<string, string>
   formats: Record<string, ColumnFormat>
+  /** Rows above the header in the original sheet (report titles), for Power Query. */
+  skipRows?: number
 }
 
 export type Workbook = {
@@ -32,6 +34,7 @@ export function cloneTable(t: Table): Table {
     rows: t.rows.map((r) => [...r]),
     formulas: { ...t.formulas },
     formats: { ...t.formats },
+    skipRows: t.skipRows,
   }
 }
 

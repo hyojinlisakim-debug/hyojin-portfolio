@@ -940,7 +940,7 @@ h2 {
   font-family: var(--mono); font-size: 12px; background: var(--bg); border: 1px solid var(--border);
   border-radius: 8px; padding: 6px 8px; color: var(--text);
 }
-.xl-formula code { flex: 1; word-break: break-all; }
+.xl-formula code { flex: 1; word-break: break-all; white-space: pre-wrap; }
 .xl-formula button { font-family: var(--mono); font-size: 11.5px; background: none; border: none; color: var(--accent); cursor: pointer; white-space: nowrap; }
 .xl-table-wrap { overflow: auto; max-height: 520px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg); }
 .xl-table { border-collapse: collapse; width: max-content; min-width: 100%; font-size: 12.5px; }
@@ -1086,3 +1086,72 @@ h1.hx-title span { color: var(--accent); }
 .xl-ident:hover { text-decoration: underline; }
 .xl-code { font-family: var(--mono); font-size: 13px; line-height: 1.6; min-height: 200px; white-space: pre; tab-size: 2; }
 @media (max-width: 900px) { .xl-sql { grid-template-columns: minmax(0, 1fr); } .xl-schema { max-height: 220px; } }
+/* Lab tabs, SQL helper, reports */
+.xl-tabs { display: flex; gap: 4px; flex-wrap: wrap; border-bottom: 1px solid var(--border); margin-bottom: 1rem; }
+.xl-tab {
+  font-family: var(--sans); font-size: 13.5px; font-weight: 500; padding: 9px 14px; cursor: pointer;
+  background: none; border: none; border-bottom: 2px solid transparent; color: var(--muted); margin-bottom: -1px;
+}
+.xl-tab:hover { color: var(--text); }
+.xl-tab[aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent); }
+.xl-builder { display: flex; flex-direction: column; gap: 0.9rem; margin-bottom: 0.5rem; }
+.xl-field { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: var(--muted); border: none; padding: 0; min-width: 0; }
+.xl-field legend { margin-bottom: 6px; padding: 0; }
+.xl-field.inline { flex-direction: row; align-items: center; flex-wrap: wrap; }
+.xl-field select, .xl-field input { color: var(--text); }
+.xl-checks { display: flex; flex-wrap: wrap; gap: 6px 14px; color: var(--text); font-size: 13px; max-height: 140px; overflow: auto; }
+.xl-checks label { display: inline-flex; align-items: center; gap: 5px; }
+.xl-learn { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 0.5rem; }
+.xl-lesson { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) auto; gap: 1rem; align-items: center; border: 1px solid var(--border); border-radius: 10px; padding: 0.8rem 1rem; background: var(--bg); }
+.xl-lesson b { font-size: 14px; font-weight: 600; }
+.xl-lesson p { font-size: 13px; color: var(--muted); line-height: 1.55; margin-top: 3px; }
+.xl-lesson pre { font-family: var(--mono); font-size: 12px; line-height: 1.5; white-space: pre-wrap; margin: 0; color: var(--text); }
+@media (max-width: 900px) { .xl-lesson { grid-template-columns: minmax(0, 1fr); } }
+.xl-code-block { font-family: var(--mono); font-size: 12px; line-height: 1.55; white-space: pre; overflow: auto; max-height: 420px; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 0.8rem 1rem; margin-top: 0.6rem; }
+/* Report views keep their own light "document" look in both themes, like the tools they imitate. */
+.sap-report { border: 1px solid #c3ccd6; border-radius: 6px; overflow: hidden; background: #fff; color: #1d2d3e; font-family: Arial, Helvetica, sans-serif; }
+.sap-bar { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; align-items: baseline; padding: 10px 14px; background: #354a5f; color: #fff; font-size: 13px; }
+.sap-bar span { font-size: 12px; color: #d8e1ea; }
+.sap-grid { overflow: auto; max-height: 560px; }
+.sap-grid table { border-collapse: collapse; width: max-content; min-width: 100%; font-size: 12px; }
+.sap-grid th { position: sticky; top: 0; background: #e5eaf0; color: #1d2d3e; text-align: left; font-weight: 700; padding: 6px 10px; border: 1px solid #c3ccd6; white-space: nowrap; }
+.sap-grid td { padding: 4px 10px; border: 1px solid #e1e6eb; white-space: nowrap; }
+.sap-grid tbody tr:nth-child(even) td { background: #f7f9fb; }
+.sap-grid td.num { text-align: right; font-variant-numeric: tabular-nums; }
+.sap-grid tr.subtotal td { background: #fff4cc !important; font-weight: 700; border-top: 1px solid #d9c27a; }
+.sap-grid tr.total td { background: #ffe08a !important; font-weight: 700; border-top: 2px solid #c9a227; }
+.sap-grid tr.sap-gap td { background: #fff !important; color: #6a7d90; font-style: italic; text-align: center; }
+.bi-report { background: #f3f2f1; border-radius: 8px; padding: 14px; color: #252423; font-family: 'Segoe UI', 'Public Sans', Arial, sans-serif; }
+.bi-head { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; align-items: baseline; margin-bottom: 12px; }
+.bi-head b { font-size: 17px; font-weight: 600; }
+.bi-head span { font-size: 12px; color: #605e5c; }
+.bi-note { font-size: 13px; color: #a4262c; margin-bottom: 10px; }
+.bi-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin-bottom: 10px; }
+.bi-tile { background: #fff; border-radius: 4px; padding: 12px 14px; box-shadow: 0 1px 2px rgba(0,0,0,0.08); min-width: 0; margin-bottom: 10px; }
+.bi-kpis .bi-tile { margin-bottom: 0; }
+.bi-tile > span { display: block; font-size: 12.5px; color: #605e5c; margin-bottom: 6px; }
+.bi-tile > b { display: block; font-size: 26px; font-weight: 600; color: #252423; font-variant-numeric: tabular-nums; }
+.bi-tile svg { width: 100%; height: auto; display: block; }
+.bi-tile small { font-size: 11.5px; color: #605e5c; }
+.bi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 10px; }
+.bi-label { font-size: 12px; fill: #605e5c; }
+.bi-value { font-size: 12px; fill: #252423; }
+.bi-axis { stroke: #c8c6c4; stroke-width: 1; }
+.bi-bar { cursor: pointer; }
+.bi-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.bi-table th { text-align: left; font-weight: 600; color: #605e5c; border-bottom: 1px solid #e1dfdd; padding: 6px 8px; }
+.bi-table td { padding: 6px 8px; border-bottom: 1px solid #f3f2f1; cursor: pointer; }
+.bi-table .num { text-align: right; font-variant-numeric: tabular-nums; }
+.bi-table tr.sel td { background: #deecf9; }
+.bi-share { display: flex; align-items: center; gap: 8px; min-width: 120px; }
+.bi-share i { display: block; height: 10px; background: #118DFF; border-radius: 2px; }
+.bi-share span { font-size: 12px; color: #605e5c; }
+@media print {
+  html.xl-printing body * { visibility: hidden !important; }
+  html.xl-printing #xl-report, html.xl-printing #xl-report * { visibility: visible !important; }
+  html.xl-printing #xl-report { position: absolute; left: 0; top: 0; width: 100%; }
+  html.xl-printing .sap-grid { max-height: none; overflow: visible; }
+  html.xl-printing .xl-no-print { display: none !important; }
+}
+.xl-grid.wide { grid-template-columns: minmax(0, 1fr); }
+.xl-grid.wide > :last-child { order: -1; }
